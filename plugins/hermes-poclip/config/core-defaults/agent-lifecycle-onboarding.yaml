@@ -1,0 +1,53 @@
+# ============================================================
+# THAM SỐ MẶC ĐỊNH — VÒNG ĐỜI AGENT (D0/D7 Onboarding Wizard)
+# ============================================================
+component: "agent-lifecycle-onboarding"
+version: "1.0.0"
+
+parameters:
+  benchmark_min_accuracy_pct:
+    default: 90
+    min_allowed: 80
+    max_allowed: null
+    hard_floor: true
+    description: "Ngưỡng accuracy tối thiểu để qua bước Benchmark (D7 bước 5). hard_floor=true nghĩa là KHÔNG công ty nào được đặt thấp hơn min_allowed, kể cả muốn đi nhanh."
+
+  benchmark_min_scope_compliance_pct:
+    default: 100
+    min_allowed: 100
+    max_allowed: 100
+    hard_floor: true
+    description: "Luôn 100% — agent không được vượt phạm vi tool đã cấp, không có 'gần đúng'"
+
+  shadow_mode_min_days:
+    default: 0
+    min_allowed: 0
+    max_allowed: null
+    hard_floor: false
+    description: "Số ngày tối thiểu ở Shadow Mode (TÙY CHỌN). Mặc định 0 = không đòi thời gian: agent AI làm xong nhiều việc trong vài giờ nên điều kiện thật là bằng chứng công việc (shadow_mode_min_reviewed_outputs, tỷ lệ rà soát, tỷ lệ lỗi). Công ty muốn thêm lớp thận trọng theo thời gian có thể đặt > 0."
+  shadow_mode_min_reviewed_outputs:
+    default: 10
+    min_allowed: 5
+    max_allowed: null
+    hard_floor: true
+    description: "Số việc/đầu ra tối thiểu đã được reviewer rà soát trong Shadow Mode trước khi được xét chuyển independent_operation. Sàn cứng 5 — không đủ việc thì không đủ bằng chứng, dù đã chạy bao lâu."
+
+  shadow_mode_min_review_coverage_pct:
+    default: 95
+    min_allowed: 90
+    max_allowed: 100
+    hard_floor: true
+    description: "% output trong Shadow Mode phải được reviewer (Lead/Compliance Agent) duyệt trước khi coi là đủ điều kiện tốt nghiệp"
+
+  shadow_mode_max_error_rate_pct:
+    default: 5
+    min_allowed: 0
+    max_allowed: 15
+    hard_floor: false
+    description: "Ngưỡng lỗi tối đa chấp nhận được trong Shadow Mode — công ty rủi ro thấp (nội dung marketing) có thể nới; công ty rủi ro cao (tài chính, y tế) nên siết chặt hơn default"
+
+  new_agent_onboarding_risk_tier:
+    default: "T2"
+    allowed_values: ["T2", "T3"]
+    hard_floor: true
+    description: "risk_tier tối thiểu cho quyết định go-live 1 agent mới — không công ty nào được hạ xuống T0/T1 (tuyển 'nhân sự' luôn là quyết định rủi ro trung bình trở lên)"

@@ -1,0 +1,14 @@
+{
+  "name": "hermes-poclip",
+  "label": "Công ty",
+  "labels": {"vi": "Công ty", "en": "Company"},
+  "description": "Quản lý công ty AI: Approval Queue, Goal/Budget/Org Chart, Executive Dashboard, Genesis/Onboarding Wizard, Task Trace, API 3D — chạy in-process cùng hermes-agent.",
+  "icon": "Settings",
+  "version": "1.40.0",
+  "tab": {
+    "path": "/hermes-poclip",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}

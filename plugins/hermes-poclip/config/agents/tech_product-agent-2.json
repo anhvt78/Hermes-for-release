@@ -1,0 +1,95 @@
+{
+  "agent_id": "tech_product-agent-2",
+  "version": "1.0.0",
+  "role_type": "worker",
+  "reports_to": "tech_product-lead-agent",
+  "cluster": "tech_product",
+  "status": "sandbox",
+  "lifecycle_stage": "design",
+  "objective": {
+    "primary_goal": "Quản lý dự án: giữ tiến độ và minh bạch trạng thái công việc kỹ thuật trong phòng Kỹ thuật/Sản phẩm",
+    "primary_goal_en": "Project Manager: maintain delivery schedules and transparent status of technical work in the Tech & Product department",
+    "north_star_kpi_ref": "kpi_sprint_delivery"
+  },
+  "kpis": [
+    {
+      "id": "kpi_sprint_delivery",
+      "metric": "sprint_commitment_met_pct",
+      "target_operator": ">=",
+      "target_value": 85,
+      "unit": "percent",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_board_hygiene",
+      "metric": "tasks_updated_within_24h_pct",
+      "target_operator": ">=",
+      "target_value": 90,
+      "unit": "percent",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_risk_reporting",
+      "metric": "risks_raised_before_slip_pct",
+      "target_operator": ">=",
+      "target_value": 90,
+      "unit": "percent",
+      "frequency": "monthly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "product.release_deployed",
+      "order.completed",
+      "meeting.decision_recorded"
+    ],
+    "emits_event_topics": [
+      "meeting.convene_requested",
+      "report.okr_weekly_update"
+    ]
+  },
+  "tools": [
+    {
+      "name": "kanban_show",
+      "scope": "write:tasks_and_sprints — thay cho công cụ chưa có thật «project_tracker»",
+      "write_access": false
+    },
+    {
+      "name": "terminal",
+      "scope": "read_only:project_metrics — thay cho công cụ chưa có thật «database_query»",
+      "write_access": false
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 500000,
+    "requires_human_approval_above_vnd": 5000000,
+    "forbidden_actions": [
+      "change_release_scope_without_lead_approval",
+      "commit_deadline_to_customer_without_lead_approval"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "sprint_scope_change_or_blocked_task",
+      "action": "request_lead_decision",
+      "target_agent_or_human": "tech_product-lead-agent",
+      "max_response_time_seconds": 1800
+    },
+    {
+      "condition": "timeline_slip_risk_detected",
+      "action": "raise_risk_with_recovery_options",
+      "target_agent_or_human": "tech_product-lead-agent",
+      "max_response_time_seconds": 3600
+    },
+    {
+      "condition": "cross_department_dependency_stalls_delivery",
+      "action": "escalate_with_impact_analysis",
+      "target_agent_or_human": "chu_tich",
+      "max_response_time_seconds": 3600
+    }
+  ],
+  "sandbox_mode": "non_main",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "_note": "Bổ sung 15/09/2026: vị trí này do Genesis tạo ở bước D0.5 nhưng trước đây CHƯA có thẻ vai trò, nên màn Cơ chế vận hành để trống 4 cột (leo thang / hạn mức tự quyết / ngưỡng xin ý kiến / KPI). Thẻ này bổ sung cho đúng vị trí thật, KHÔNG thay đổi 11 thẻ cũ."
+}

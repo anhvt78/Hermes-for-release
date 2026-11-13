@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ Đồ Tổ Chức (D1) — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .oc-toolbar { display:flex; align-items:center; gap:1rem; padding:0.75rem 2rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; }
+    .oc-toolbar h2 { font-size:1rem; font-weight:700; color:#0f172a; margin:0; }
+    .oc-tree-wrap { padding:1.5rem 2rem; }
+    .oc-node { margin:0.35rem 0; }
+    .oc-node-header { display:flex; align-items:center; gap:0.5rem; cursor:pointer; padding:0.5rem 0.85rem; border-radius:8px; background:#fff; border:1px solid #e2e8f0; transition:box-shadow .15s; }
+    .oc-node-header:hover { box-shadow:0 2px 8px rgba(0,0,0,.08); background:#f8fafc; }
+    .oc-profile-id { font-family:monospace; font-size:0.8rem; color:#475569; min-width:140px; font-weight:600; }
+    .oc-role { font-size:0.75rem; color:#64748b; min-width:90px; }
+    .oc-unit { font-size:0.72rem; padding:0.1rem 0.4rem; border-radius:999px; background:#f1f5f9; color:#475569; font-weight:600; }
+    .oc-hb-badge { font-size:0.78rem; display:inline-flex; align-items:center; gap:0.2rem; }
+    .oc-task-count { font-size:0.72rem; color:#6366f1; min-width:54px; }
+    .oc-children { margin-left:1.5rem; border-left:2px dashed #e2e8f0; padding-left:0.75rem; }
+    /* Heartbeat badge colors */
+    .hb-thuc  { color:#16a34a; }
+    .hb-ngu   { color:#94a3b8; }
+    .hb-stale { color:#ef4444; }
+    /* VETO section */
+    .oc-veto-section { padding:1rem 2rem 1.5rem; }
+    .oc-veto-section h3 { font-size:0.95rem; font-weight:700; color:#0f172a; margin-bottom:0.75rem; }
+    .oc-veto-row { display:flex; align-items:center; gap:0.75rem; padding:0.4rem 0.75rem; border-bottom:2px dashed #dc2626; margin-bottom:0.5rem; font-size:0.83rem; }
+    .oc-veto-from { font-family:monospace; font-weight:700; color:#0f172a; }
+    .oc-veto-type { font-size:0.7rem; padding:0.1rem 0.4rem; border-radius:999px; font-weight:700; background:#fee2e2; color:#991b1b; }
+    .oc-veto-arrow { color:#dc2626; font-size:0.9rem; }
+    .oc-veto-clusters { display:flex; gap:0.4rem; flex-wrap:wrap; }
+    .oc-veto-cluster-tag { font-size:0.72rem; padding:0.1rem 0.4rem; border-radius:999px; background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:12px; padding:1.5rem; max-width:560px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,.15); max-height:85vh; overflow-y:auto; }
+    .modal-box h3 { font-size:1rem; font-weight:700; color:#0f172a; margin-bottom:1rem; }
+    .modal-field { display:flex; gap:0.5rem; margin-bottom:0.4rem; font-size:0.84rem; }
+    .modal-label { color:#64748b; min-width:130px; font-weight:600; flex-shrink:0; }
+    .modal-value { color:#0f172a; word-break:break-all; }
+    .modal-close { float:right; background:none; border:none; cursor:pointer; font-size:1.2rem; color:#94a3b8; }
+    .modal-section-title { font-size:0.82rem; font-weight:700; color:#475569; margin:0.75rem 0 0.4rem; text-transform:uppercase; letter-spacing:.03em; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid #e2e8f0; border-top-color:#4f46e5; border-radius:50%; animation:spin .6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .oc-empty { color:#94a3b8; font-size:0.9rem; padding:1.5rem 0; }
+    .oc-empty-hint { color:#64748b; font-size:0.82rem; margin-top:0.5rem; font-family:monospace; }
+    .alert-ok       { background:#dcfce7; color:#166534; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.78rem; font-weight:700; }
+    .alert-warn     { background:#fef3c7; color:#92400e; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.78rem; font-weight:700; }
+    .alert-critical { background:#fee2e2; color:#991b1b; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.78rem; font-weight:700; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>hermes-poclip</span>
+  <h1>Org Chart — D1 (TD-03)</h1>
+  <a href="/budget" style="color:#a5b4fc;font-size:0.85rem;text-decoration:none;">→ Budget View</a>
+  <a href="/executive-dashboard" style="color:#a5b4fc;font-size:0.85rem;text-decoration:none;">→ Executive Dashboard</a>
+</header>
+
+<div class="oc-toolbar">
+  <h2>Sơ Đồ Tổ Chức — D1 (TD-03)</h2>
+  <button class="btn btn-approve" onclick="loadTree()" id="btn-refresh">↻ Refresh</button>
+  <span id="oc-status" style="font-size:0.82rem;color:#64748b;"></span>
+</div>
+
+<div class="oc-tree-wrap" id="oc-tree-wrap">
+  <div class="oc-empty"><span class="spinner"></span> Đang tải...</div>
+</div>
+
+<!-- VETO section rendered after tree -->
+<div class="oc-veto-section" id="oc-veto-section" style="display:none;">
+  <h3>Lớp VETO (Compliance/Audit)</h3>
+  <div id="oc-veto-list"></div>
+</div>
+
+<!-- Agent detail modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modal-box">
+    <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    <h3 id="modal-title">Chi Tiết Agent</h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="/static/js/org.js"></script>
+<script>
+  loadTree();
+</script>
+<div style="padding:1rem 2rem;font-size:0.82rem;color:#64748b;border-top:1px solid #e2e8f0;margin-top:1rem;">
+  <a href="/genesis" style="color:#059669;margin-right:1rem;">→ D0 Genesis Wizard</a>
+  <a href="/onboarding-wizard" style="color:#1e40af;margin-right:1rem;">→ D7 Onboarding Wizard</a>
+  <a href="/executive-dashboard" style="color:#7c3aed;">→ D6 Executive Dashboard</a>
+</div>
+</body>
+</html>

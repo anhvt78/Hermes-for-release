@@ -1,0 +1,97 @@
+# ============================================================
+# HERMES+ CLUSTER REGISTRY — KIẾN TRÚC MỞ CHO NHIỀU LOẠI HÌNH CÔNG TY
+# [BỔ SUNG] Thay cho danh sách phòng ban đóng cứng (enum) từng nằm
+# rải rác ở agent-role-card.schema.json, event-topics.yaml,
+# G.1.1.2/G.3.2/G.4 (tai-lieu-tich-hop.md). Từ nay, MỌI nơi cần biết
+# "công ty có bao nhiêu cluster, tên gì" phải đọc file này, KHÔNG
+# đọc số/tên viết cứng trong văn bản hay trong enum của schema.
+# ============================================================
+version: "1.0.0"
+
+# --------------------------------------------------------------
+# NHÓM CORE — bắt buộc có ở MỌI công ty dùng Hermes+, không phụ
+# thuộc ngành nghề. Đây là "bộ khung cố định" (constitution.yaml,
+# D0-D8, G.1/G.2/G.3/G.4.5.5) được thiết kế để vận hành các cluster
+# này mà không cần biết trước công ty làm ngành gì.
+# --------------------------------------------------------------
+core_clusters:
+  - id: "compliance"
+    display_name_vi: "Tuân thủ"
+    mandatory: true
+    reason: "Rủi ro pháp lý/đạo đức tồn tại ở mọi loại hình công ty — G.1, core_values.enforcement"
+  - id: "audit"
+    display_name_vi: "Kiểm toán độc lập"
+    mandatory: true
+    reason: "Tuyến phòng thủ thứ 3 — G.1.1.1, báo cáo thẳng chairman_human"
+  - id: "training"
+    display_name_vi: "Đào tạo & Phát triển năng lực Agent"
+    mandatory: true
+    reason: "[BỔ SUNG] Mọi công ty đều cần cơ chế nâng cấp kỹ năng agent; nội dung đào tạo khác nhau nhưng cơ chế (tìm nguồn, xác định nhu cầu) giống nhau — nuôi trực tiếp bởi G.4.5.5"
+  - id: "hr_core"
+    display_name_vi: "Vòng đời & Cơ cấu tổ chức (chức năng lõi của HR)"
+    mandatory: true
+    reason: "[BỔ SUNG] Tách phần lõi của HR (D0/D7 onboarding, phối hợp G.4.5.5) khỏi phần nghiệp vụ nhân sự đặc thù ngành (nếu công ty cần thêm, khai báo riêng trong variable_clusters)"
+  - id: "executive"
+    display_name_vi: "Điều hành (CEO Agent)"
+    mandatory: true
+    reason: "[CHỐT 09/11/2026] BẮT BUỘC: sáu nhân viên khung (CEO, Nhân sự, Đào tạo, Tuân thủ, Kiểm toán, Vận hành) có mặt ở MỌI công ty — đây là tư tưởng thiết kế của Hermes+ (mô hình «công ty một người»: giữa Chủ tịch và các trưởng phòng luôn có CEO Agent điều phối). Trình lập công ty luôn tạo CEO Agent; xem genesis/__init__.py (D0.2)."
+  - id: "infrastructure_ops"
+    display_name_vi: "Vận hành & Hạ tầng"
+    mandatory: true
+    reason: "[BỔ SUNG 2026-09-10] Giám sát tình trạng vận hành (agent/task Kanban/cuộc họp treo) + sức khỏe hạ tầng hermes — báo cáo thẳng chairman_human, độc lập CEO Agent để vẫn phát hiện được kể cả khi chính CEO Agent gặp sự cố."
+
+# --------------------------------------------------------------
+# NHÓM VARIABLE — công ty tự khai báo theo ngành/mô hình kinh
+# doanh của mình. Danh sách dưới đây CHỈ LÀ VÍ DỤ MẪU cho mô hình
+# E-commerce/SaaS (giữ lại để không phá các phần Hermes-Poclip đã
+# viết chi tiết theo mẫu này) — KHÔNG phải phần cứng của framework.
+# --------------------------------------------------------------
+variable_clusters_template_ecommerce_saas:
+  _note: "Mẫu tham khảo — xoá/thay thế toàn bộ mục này khi áp dụng cho công ty khác ngành. Xem D0.4 để biết cách công ty tự sinh ra danh sách của mình."
+  clusters:
+    - id: "marketing"
+      display_name_vi: "Marketing"
+      priority_at_genesis: 1
+    - id: "sales"
+      display_name_vi: "Kinh doanh"
+      priority_at_genesis: 1
+    - id: "finance"
+      display_name_vi: "Tài chính"
+      priority_at_genesis: 0
+      note: "priority 0 = bắt buộc có từ ngày đầu, không thể trì hoãn (Phần III.3.4 cẩm nang tham khảo)"
+    - id: "tech_product"
+      display_name_vi: "Kỹ thuật/Sản phẩm"
+      priority_at_genesis: 2
+    - id: "customer_success"
+      display_name_vi: "Chăm sóc khách hàng"
+      priority_at_genesis: 2
+
+# Mẫu cụm riêng của từng ngành (vd. công ty đầu tư) nằm trong bản phác thảo của ngành đó: config/blueprints/<ngành>.yaml, mục «cluster_template».
+
+# --------------------------------------------------------------
+# VÍ DỤ THAM KHẢO cho ngành khác — minh hoạ tính "mở" của kiến trúc,
+# KHÔNG được hệ thống dùng, chỉ để người đọc hình dung.
+# --------------------------------------------------------------
+variable_clusters_template_manufacturing_example_only:
+  _note: "Ví dụ minh hoạ — công ty sản xuất có thể khai báo khác hẳn e-commerce, hệ thống core (Compliance/Audit/Training/HR/D0-D8) vẫn hoạt động y nguyên không cần sửa code."
+  clusters:
+    - id: "procurement"
+      display_name_vi: "Mua hàng"
+    - id: "production"
+      display_name_vi: "Sản xuất"
+    - id: "quality_assurance"
+      display_name_vi: "Kiểm định chất lượng"
+    - id: "sales"
+      display_name_vi: "Kinh doanh"
+    - id: "finance"
+      display_name_vi: "Tài chính"
+
+validation_rule: >
+  Mọi schema (agent-role-card.schema.json), mọi bảng thống kê
+  (G.1.1.2, G.3.2, G.4 KPI collector), mọi văn bản mô tả số lượng
+  Lead Agent PHẢI đọc động từ file này (core_clusters +
+  variable_clusters đang active của công ty), KHÔNG được viết cứng
+  số đếm ("7 Lead Agent") hay tên cluster cụ thể trong logic hoặc
+  trong câu văn mô tả kiến trúc. Số liệu cụ thể (vd. "công ty X có
+  6 Lead Agent") chỉ được nêu trong TÀI LIỆU VẬN HÀNH của một công
+  ty cụ thể, không nêu trong tài liệu THIẾT KẾ KHUNG.

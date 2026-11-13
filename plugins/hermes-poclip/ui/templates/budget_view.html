@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budget View (D3) — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .bv-toolbar { display:flex; align-items:center; gap:1rem; padding:0.75rem 2rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; }
+    .bv-toolbar h2 { font-size:1rem; font-weight:700; color:#0f172a; margin:0; }
+    .bv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; padding:1.5rem 2rem; }
+    .bv-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:1.25rem; }
+    .bv-card-title { font-size:0.85rem; font-weight:700; color:#0f172a; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; }
+    .bv-scope-badge { font-size:0.7rem; padding:0.1rem 0.4rem; border-radius:999px; font-weight:600; }
+    .scope-agent   { background:#dbeafe; color:#1d4ed8; }
+    .scope-cluster { background:#fef9c3; color:#92400e; }
+    .scope-company { background:#ede9fe; color:#5b21b6; }
+    .bv-bar-wrap { background:#e2e8f0; border-radius:999px; height:10px; margin:0.5rem 0; overflow:hidden; }
+    .bv-bar { height:100%; border-radius:999px; transition:width .4s; }
+    .bar-green    { background:#16a34a; }
+    .bar-warning  { background:#f59e0b; }
+    .bar-critical { background:#ef4444; }
+    .bv-stat { display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:0.25rem; }
+    .bv-stat-label { color:#64748b; }
+    .bv-stat-val { color:#0f172a; font-weight:600; }
+    .bv-alert-badge { display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:999px; margin-top:0.5rem; }
+    .alert-green    { background:#dcfce7; color:#166534; }
+    .alert-warning  { background:#fef3c7; color:#92400e; }
+    .alert-critical { background:#fee2e2; color:#991b1b; }
+    .bv-stop-btn { margin-top:0.75rem; width:100%; padding:0.5rem; border:1px solid #ef4444; background:#fff; color:#ef4444; border-radius:6px; cursor:pointer; font-size:0.82rem; font-weight:600; }
+    .bv-stop-btn:hover { background:#fef2f2; }
+    .bv-stop-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .bv-section { padding:0 2rem 1.5rem; }
+    .bv-section h3 { font-size:0.95rem; font-weight:700; color:#0f172a; margin-bottom:0.75rem; }
+    .bv-roas-row { display:flex; align-items:center; gap:1rem; padding:0.5rem 0; border-bottom:1px solid #f1f5f9; font-size:0.83rem; }
+    .bv-cluster-name { font-weight:600; color:#0f172a; min-width:120px; }
+    .bv-roas-val { min-width:60px; text-align:right; font-weight:700; }
+    .roas-good { color:#16a34a; }
+    .roas-null { color:#94a3b8; }
+    .bv-empty { color:#94a3b8; font-size:0.9rem; padding:1rem 0; }
+    .bv-burn-rate { font-size:0.78rem; color:#475569; margin:0.3rem 0 0.1rem; }
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:12px; padding:1.5rem; max-width:420px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,.15); }
+    .modal-box h3 { font-size:1rem; font-weight:700; color:#0f172a; margin-bottom:0.75rem; }
+    .modal-warn { background:#fef2f2; border:1px solid #fca5a5; border-radius:6px; padding:0.75rem; font-size:0.85rem; color:#991b1b; margin-bottom:1rem; }
+    .modal-actions { display:flex; gap:0.75rem; justify-content:flex-end; }
+    .btn-cancel { background:#f1f5f9; color:#0f172a; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; font-size:0.85rem; }
+    .btn-danger { background:#ef4444; color:#fff; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; font-size:0.85rem; font-weight:700; }
+    .spinner { display:inline-block; width:16px; height:16px; border:2px solid #e2e8f0; border-top-color:#4f46e5; border-radius:50%; animation:spin .6s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>hermes-poclip</span>
+  <h1>Budget View — D3 (TD-02)</h1>
+  <a href="/goal-tree" style="color:#a5b4fc;font-size:0.85rem;text-decoration:none;">→ Goal Tree</a>
+</header>
+
+<div class="bv-toolbar">
+  <h2>Tổng Quan Ngân Sách</h2>
+  <button class="btn btn-approve" onclick="loadAll()" id="btn-refresh">↻ Refresh</button>
+  <span id="bv-status" style="font-size:0.82rem;color:#64748b;"></span>
+</div>
+
+<div class="bv-grid" id="bv-policies-grid">
+  <div class="bv-empty">Đang tải...</div>
+</div>
+
+<div class="bv-section">
+  <h3>ROAS Theo Cụm</h3>
+  <div id="bv-roas-list"><div class="bv-empty">Đang tải...</div></div>
+</div>
+
+<!-- Emergency stop confirm modal -->
+<div class="modal-overlay" id="stop-modal">
+  <div class="modal-box">
+    <h3>⚠ Xác nhận Emergency Stop</h3>
+    <div class="modal-warn">
+      Thao tác này sẽ dừng NGAY LẬP TỨC tất cả agent thuộc scope này.
+      Chỉ Chủ tịch mới có thể thực hiện.
+    </div>
+    <p style="font-size:0.85rem;color:#475569;margin-bottom:0.75rem;">
+      Policy: <strong id="stop-policy-label"></strong>
+    </p>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.82rem;color:#64748b;">Actor (chỉ nhận 'chu_tich'):</label>
+      <input id="stop-actor" value="chu_tich" style="width:100%;margin-top:0.25rem;padding:0.4rem;border:1px solid #cbd5e1;border-radius:4px;font-size:0.85rem;">
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <label style="font-size:0.82rem;color:#64748b;">Lý do:</label>
+      <input id="stop-reason" placeholder="Nhập lý do..." style="width:100%;margin-top:0.25rem;padding:0.4rem;border:1px solid #cbd5e1;border-radius:4px;font-size:0.85rem;">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeStopModal()">Hủy</button>
+      <button class="btn-danger" onclick="confirmStop()">Xác nhận STOP</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/budget.js"></script>
+</body>
+</html>

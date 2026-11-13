@@ -1,0 +1,30 @@
+# ĐƠN VỊ ĐỊNH TUYẾN CHỈ ĐẠO — CHỈ NHÓM LÕI (Chủ tịch chốt 09/11/2026).
+# Sổ trắng của công ty mới chỉ mang các đơn vị của sáu nhân viên khung (Điều hành, Nhân sự lõi, Hạ tầng & Vận hành, Tuân thủ, Kiểm toán, Đào tạo).
+# Các phòng nghiệp vụ theo ngành do công ty tự khai (trình lập công ty, bước D0.4); ví dụ mẫu thương mại điện tử/SaaS nằm ở config/sample-companies/ecommerce/directive-routing.yaml.
+
+version: 2.0.0
+units:
+- slug: executive
+  display_name: Điều hành
+  priority: 100
+  keywords: [\bgiám đốc\b, \bceo\b, \bđiều hành\b, \bban điều hành\b, \bc-level\b]
+- slug: hr_core
+  display_name: Nhân sự
+  priority: 120
+  keywords: [\bheadcount\b, \bcơ cấu tổ chức\b, \bvòng đời nhân sự\b, \bonboarding\b, \bhợp đồng lao động\b]
+- slug: infrastructure_ops
+  display_name: Hạ tầng & Vận hành
+  priority: 130
+  keywords: [\bhạ tầng\b, \binfrastructure\b, \buptime\b, \bsự cố hệ thống\b, \bmáy chủ\b, \bđộ sẵn sàng\b]
+- slug: compliance
+  display_name: Tuân thủ
+  priority: 140
+  keywords: [\btuân thủ\b, \bpháp lý\b, \bquy định\b, \bvi phạm\b, \bchính sách\b]
+- slug: audit
+  display_name: Kiểm toán nội bộ
+  priority: 150
+  keywords: [\bkiểm toán\b, \baudit\b, \bsoát xét\b, \bđối soát độc lập\b]
+- slug: training
+  display_name: Đào tạo
+  priority: 160
+  keywords: [\bđào tạo\b, \btraining\b, \bkỹ năng\b, \bhuấn luyện\b, \bbồi dưỡng\b]

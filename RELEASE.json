@@ -1,0 +1,17 @@
+{
+  "release_id": "2026.11.13-3",
+  "version": "0.21.7",
+  "source_commit": "7e6c7152b31fd93368e77476f05a96a65aba7a64",
+  "source_branch": "dong-bo-va-hoat-dong",
+  "created_at": "2026-11-13T05:27:50.528598+00:00",
+  "notes": "Sửa lỗi nghiệm thu máy 26: Bảng điều hành, giờ bản tin, hàng đợi tuyển dụng, màn Chính sách, gửi tố giác, Nhật ký hoạt động AI, phòng họp",
+  "build": {
+    "kind": "compiled",
+    "python": "cp311",
+    "platform": "linux-x86_64",
+    "cython": "3.1.4",
+    "source_release": "2026.11.13-3",
+    "default_trial_days": 365,
+    "built_at": "2026-11-13T05:38:04.212542+00:00"
+  }
+}

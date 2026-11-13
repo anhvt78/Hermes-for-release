@@ -1,0 +1,74 @@
+version: "1.0.0"
+description: >
+  MA TRẬN THẨM QUYỀN XỬ LÝ SỰ CỐ — cho từng loại sự cố trong monitor-tiers.yaml: ai được TỰ KHẮC PHỤC việc gì, giới hạn bao nhiêu lần,
+  khi nào phải THÔNG BÁO ai, và khi nào báo Chủ tịch. Chủ tịch đã chọn mô hình 3 mức (2026-10-24): 0 = tự khắc phục lỗi hệ thống thông thường
+  (chỉ trong danh sách việc cho phép, có giới hạn, ghi nhật ký bắt buộc); 1 = thông báo kèm gói thông tin cho người liên quan; 2 = lãnh đạo/CEO quyết định
+  phần nghiệp vụ, vượt thẩm quyền hoặc quá hạn thì báo Chủ tịch.
+
+# Danh mục việc được phép tự khắc phục — do MÃ CHƯƠNG TRÌNH thực hiện (công cụ poclip_self_heal), agent không tự gõ lệnh:
+#   unblock_card      mở khoá thẻ bị tắc do lỗi hệ thống (loại tắc «transient» hoặc thẻ bị bộ ngắt lỗi của điều phối đỗ lại); KHÔNG mở thẻ tắc vì «cần quyết định/thông tin/năng lực/phụ thuộc»
+#   reclaim_card      thu hồi thẻ đang chạy nhưng mất nhịp tim (tiến trình đã chết) để điều phối giao chạy lại
+#   recompute_board   nhắc điều phối tính lại thẻ sẵn sàng của một bảng (thẻ kẹt ở todo/ready)
+#   restart_gateway   khởi động lại dịch vụ điều phối — chỉ khi Chủ tịch/quản trị đã khai lệnh khởi động chính thức (cfg_settings self_heal.restart_commands.gateway)
+#   restart_dashboard khởi động lại dịch vụ bảng điều khiển — như trên (restart_commands.dashboard)
+actions:
+  - unblock_card
+  - reclaim_card
+  - recompute_board
+  - restart_gateway
+  - restart_dashboard
+
+# Người nhận thông báo khi leo thang:
+#   owner       người phụ trách phát hiện (cfg_monitor_classes.owning_profile)
+#   unit_lead   trưởng phòng của nhân viên bị ảnh hưởng (theo sơ đồ tổ chức); không có thì quản lý trực tiếp của họ
+#   ceo         CEO
+#   compliance  Tuân thủ
+#   audit       Kiểm toán
+# Viết «a|b» = người đầu tiên có trong công ty. Chủ tịch xử lý riêng qua trường chairman.
+#   chairman: always (luôn báo) | on_escalation (báo một lần khi leo thang hoặc tự khắc phục không xong) | never
+# kind: system (lỗi hệ thống thông thường) | work (logic công việc — cần người quyết định) | external (cần Chủ tịch/bên ngoài, vd hết tiền nhà cung cấp) | control (khối kiểm soát tự xử lý theo vai)
+# handled_by: một cơ chế khác (vd ops_response) đã mở thẻ cho loại này — luồng quét theo loại sự cố không mở thẻ trùng
+# default_mode: chế độ xử lý mặc định khi công ty mới bật giám sát (off | alert_only | auto | agent) — xem monitoring/response_mode.py
+
+defaults:
+  max_attempts: 2          # tối đa 2 lần tự khắc phục cùng một việc cho cùng một đối tượng
+  window_hours: 6          # trong cửa sổ 6 giờ; hết giới hạn → leo thang, không thử nữa
+  chairman: on_escalation
+
+classes:
+  # ── T1 Hệ thống ───────────────────────────────────────────────────────────
+  service_process_chet:   {kind: system, self_heal: [restart_gateway, restart_dashboard], notify: [ceo], default_mode: agent}
+  errors_log_moi:         {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  cron_db_loi:            {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  ban_va:                 {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  plugin_loi:             {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  tai_nguyen:             {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  tool_health:            {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  meeting_agent_timeout:  {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  dispatcher_chet:        {kind: system, self_heal: [restart_gateway, recompute_board], notify: [ceo], default_mode: alert_only, chairman: always, handled_by: ops_response}   # thẻ cho Vận hành do monitoring/ops_response.py mở (từ cảnh báo của kanban_watchdog)
+  cap_phat_ket:           {kind: system, self_heal: [], notify: ["unit_lead|ceo"], default_mode: auto}
+  agent_du_phong_han_muc: {kind: external, self_heal: [], notify: [ceo], default_mode: auto, chairman: always, handled_by: provider_health}   # hết tiền/hạn mức: monitoring/provider_health.py tự tạm dừng, báo một lần, thử lại và mở lại
+  # ── T2 Vận hành ───────────────────────────────────────────────────────────
+  task_blocked_lan_dau:   {kind: system, self_heal: [unblock_card], notify: ["unit_lead|ceo"], default_mode: auto}
+  task_blocked_loop:      {kind: work,   self_heal: [], notify: ["unit_lead|ceo"], default_mode: agent}
+  task_cho_reset:         {kind: system, self_heal: [unblock_card, reclaim_card], notify: ["unit_lead|ceo"], default_mode: auto}
+  task_ket_heartbeat:     {kind: system, self_heal: [reclaim_card], notify: ["unit_lead|ceo"], default_mode: auto}
+  task_ready_ket:         {kind: system, self_heal: [recompute_board], notify: ["unit_lead|ceo"], default_mode: auto}
+  gateway_dung:           {kind: system, self_heal: [restart_gateway], notify: [ceo], default_mode: agent, chairman: always}
+  trat_tu_task:           {kind: work,   self_heal: [], notify: ["unit_lead|ceo"], default_mode: alert_only}
+  ton_dong_task:          {kind: work,   self_heal: [], notify: ["unit_lead|ceo"], default_mode: alert_only}
+  event_delivery:         {kind: system, self_heal: [], notify: [ceo], default_mode: auto}
+  todo_triage_ket:        {kind: system, self_heal: [recompute_board], notify: ["unit_lead|ceo"], default_mode: auto}
+  phien_hop_ket:          {kind: system, self_heal: [], notify: ["unit_lead|ceo"], default_mode: auto}
+  # ── T3 Nghiệp vụ ──────────────────────────────────────────────────────────
+  de_xuat_chot_done:      {kind: work,    self_heal: [], notify: [ceo], default_mode: auto}
+  quyet_dinh_nghiep_vu:   {kind: work,    self_heal: [], notify: [ceo], default_mode: auto}
+  worker_blocked_root_cause: {kind: work, self_heal: [], notify: ["unit_lead|ceo"], default_mode: auto}
+  waiting_review_sla:     {kind: work,    self_heal: [], notify: ["unit_lead|ceo"], default_mode: auto}
+  duyet_done:             {kind: work,    self_heal: [], notify: ["unit_lead|ceo"], default_mode: auto}
+  vi_pham_quy_trinh:      {kind: control, self_heal: [], notify: [ceo, compliance], default_mode: agent, chairman: on_escalation}
+  su_co_milestone:        {kind: work,    self_heal: [], notify: [ceo], default_mode: agent}
+  logic_nghiep_vu_sai:    {kind: work,    self_heal: [], notify: [ceo], default_mode: auto}
+  chi_phi_ha_tang:        {kind: control, self_heal: [], notify: [ceo, audit], default_mode: alert_only, chairman: always}
+  kien_truc_lon:          {kind: control, self_heal: [], notify: [ceo, audit], default_mode: auto, chairman: always}
+  gd_khong_xu_ly_48h:     {kind: control, self_heal: [], notify: [ceo, audit], default_mode: auto, chairman: always}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approval Queue — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<header>
+  <span>hermes-poclip</span>
+  <h1>Approval Queue (D4 WhatNeedsMe)</h1>
+  <span class="badge-count" id="totalCount">0</span>
+</header>
+
+<div class="toolbar">
+  <label>Status:
+    <select id="filterStatus" onchange="loadQueue()">
+      <option value="">Tất cả</option>
+      <option value="pending">pending</option>
+      <option value="compliance_reviewing">compliance_reviewing</option>
+      <option value="awaiting_chairman">awaiting_chairman</option>
+      <option value="approved">approved</option>
+      <option value="rejected">rejected</option>
+      <option value="changes_requested">changes_requested</option>
+      <option value="escalated">escalated</option>
+      <option value="expired">expired</option>
+    </select>
+  </label>
+  <label>Risk Tier:
+    <select id="filterTier" onchange="loadQueue()">
+      <option value="">Tất cả</option>
+      <option value="T1">T1</option>
+      <option value="T2">T2</option>
+      <option value="T3">T3</option>
+    </select>
+  </label>
+  <button onclick="loadQueue()">↻ Refresh</button>
+</div>
+
+<div class="main">
+  <div class="queue-list" id="queueList">
+    <div class="loading">Đang tải…</div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="placeholder">← Chọn một request để xem chi tiết và thực hiện hành động.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/gs-tags.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+digest_schedule:
+  enabled: true
+  catch_up: true
+  catch_up_grace_minutes: 15
+  daily:
+    enabled: true
+    cron: "0 8 * * *"
+    timezone: "Asia/Ho_Chi_Minh"
+    description: "Daily digest 08:00 ICT"
+    channels: [telegram, dashboard]
+    retention_days: 30
+    report_offset_days: -1
+  weekly:
+    enabled: true
+    cron: "0 9 * * 1"
+    timezone: "Asia/Ho_Chi_Minh"
+    description: "Weekly digest 09:00 ICT Thứ Hai"
+    channels: [telegram, dashboard]
+    retention_days: 30
+    report_offset_weeks: -1
+
+  monthly:
+    enabled: true
+    cron: "0 8 1 * *"
+    timezone: "Asia/Ho_Chi_Minh"
+    description: "Monthly board report 08:00 ICT ngày 1 mỗi tháng"
+    report_offset_months: -1
+  quarterly:
+    enabled: true
+    cron: "0 8 1 1,4,7,10 *"
+    timezone: "Asia/Ho_Chi_Minh"
+    description: "Quarterly strategic review 08:00 ICT ngày 1 các tháng 1/4/7/10"
+    report_offset_quarters: -1
+
+delivery:
+  max_retries: 3
+  retry_max: 3
+  retry_min_interval_seconds: 300
+  timeout_minutes: 30
+  fallback_channel: dashboard
+  alert_code: ERR-TB03-002

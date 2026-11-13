@@ -1,0 +1,6 @@
+name: hermes-poclip
+version: "1.39.0"
+kind: backend
+description: "Enforce evaluate_tool_policy() trên tool call của agent do hermes-poclip provision (deny-wins 8 lớp, map qua HERMES_PROFILE). Chỉ can thiệp agent do hermes-poclip quản lý — không ảnh hưởng agent/user khác."
+hooks:
+  - pre_tool_call

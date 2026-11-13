@@ -1,0 +1,88 @@
+{
+  "agent_id": "training-lead-agent",
+  "job_title": "Trưởng phòng Đào tạo",
+  "job_title_en": "Head of Training",
+  "version": "1.0.0",
+  "role_type": "lead",
+  "reports_to": "ceo-agent",
+  "cluster": "training",
+  "status": "active",
+  "lifecycle_stage": "independent_operation",
+  "benchmark_record": null,
+  "shadow_mode_record": null,
+  "knowledge_baseline": {
+    "domain": "adult_learning_and_upskilling_best_practices",
+    "source_pack_id": "core-baseline-training-v1",
+    "company_specific_overrides_pending": true
+  },
+  "objective": {
+    "primary_goal": "[Cluster CORE — mọi công ty đều cần] Tìm nguồn tài liệu/best practice trên internet phù hợp với từng vị trí công việc; phối hợp với ceo-agent và Lead Agent liên quan để xác định đúng nhu cầu đào tạo theo nhiệm vụ thực tế; thực thi kế hoạch retrain khi agent-lifecycle chuyển sang 'review'",
+    "primary_goal_en": "[Cluster CORE — needed by every company] Source relevant training materials and best practices online for each role; coordinate with ceo-agent and relevant Lead Agents to identify actual training needs based on real work; execute the retrain plan when an agent lifecycle transitions to 'review'",
+    "north_star_kpi_ref": "kpi_training_effectiveness"
+  },
+  "kpis": [
+    {
+      "id": "kpi_training_effectiveness",
+      "metric": "post_training_kpi_improvement_pct",
+      "target_operator": ">=",
+      "target_value": 15,
+      "unit": "percent",
+      "frequency": "quarterly"
+    },
+    {
+      "id": "kpi_training_plan_lead_time",
+      "metric": "days_from_flag_to_training_plan_ready",
+      "target_operator": "<=",
+      "target_value": 5,
+      "unit": "days",
+      "frequency": "monthly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "org.structural_pattern_detected",
+      "agent.shadow_mode_cleared"
+    ],
+    "emits_event_topics": [
+      "training.plan_ready",
+      "training.retrain_completed"
+    ]
+  },
+  "tools": [
+    {
+      "name": "web_search",
+      "scope": "read_only:public_internet_no_domain_restriction",
+      "write_access": false
+    },
+    {
+      "name": "terminal",
+      "scope": "read_only:role_cards_and_kpi_history — thay cho công cụ chưa có thật «database_query»",
+      "write_access": false
+    },
+    {
+      "name": "write_file",
+      "scope": "write:draft_curriculum_only — thay cho công cụ chưa có thật «training_content_generator»",
+      "write_access": true
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 0,
+    "requires_human_approval_above_vnd": 0,
+    "forbidden_actions": [
+      "modify_role_card_of_agent_being_trained_directly",
+      "extend_shadow_mode_without_hr_lead_agent_involvement"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "training_plan_does_not_improve_kpi_after_2_cycles",
+      "action": "escalate_role_card_or_task_scope_review",
+      "target_agent_or_human": "ceo-agent",
+      "max_response_time_seconds": 0
+    }
+  ],
+  "sandbox_mode": "off",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "_note": "[D0/D7] Đây là cluster CORE (config/taxonomy/clusters.yaml) — có mặt trong MỌI công ty dùng Hermes+ bất kể ngành nghề, khác với marketing/sales/... là cluster VARIABLE theo lựa chọn từng công ty."
+}

@@ -1,0 +1,14 @@
+version: "1.0.0"
+# Seed cho ngưỡng escalation (P1). Nguồn runtime = DB (cfg_settings key='escalation_thresholds').
+# File này CHỈ dùng để seed + import/export. Xem docs/config-planes.md.
+review:                       # task-states.yaml — bước pending_review
+  reminder_hours: 24
+  escalate_hours: 72
+directive_sla_hours:          # = _SLA_HOURS hiện hành trong comm/escalation_engine.py (đơn vị giờ)
+  T1: {warn1_hours: 4.0, warn2_hours: 8.0, escalate_hours: 12.0}
+  T2: {warn1_hours: 2.0, warn2_hours: 4.0, escalate_hours: 6.0}
+  T3: {warn1_hours: 1.0, warn2_hours: null, escalate_hours: 2.0}
+alert_ack:                    # ngưỡng nhắc lại / leo thang cho CẢNH BÁO giám sát (đơn vị: PHÚT)
+  critical: {reminder_minutes: 15, escalate_minutes: 45}
+  warning:  {reminder_minutes: 60, escalate_minutes: 180}
+  info:     {reminder_minutes: 240, escalate_minutes: 720}

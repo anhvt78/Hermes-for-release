@@ -1,0 +1,56 @@
+# Ánh xạ Comm-Center → Kanban THẬT (seed của plugin hermes-poclip).
+#
+# Nguồn theo công ty: <poclip home>/kanban_map.yaml  (D4 — ghi khi Chủ tịch duyệt đề xuất bảng,
+#   hoặc bởi scripts/kanban_boards_sync.py --apply). Khi tệp đó tồn tại, tệp này
+#   KHÔNG được dùng (chỉ là fallback khi công ty chưa chạy sync).
+# Thứ tự chọn bảng (D5): flow → đơn vị → work_type → default_board  (xem docs/hermes-poclip/kanban-boards.md)
+# An toàn (D5): allow_default_fallback=false → RAISE khi bảng đích không
+#   tồn tại — KHÔNG ghi nhầm vào sổ vận hành 'default' của đội.
+#
+# Seed giữ default_board: default (vì bản cài không tạo bảng theo nhóm —
+#   xem D10.1). Tệp công ty đặt default_board: noi-bo (xem D7).
+
+default_board: default
+allow_default_fallback: false
+company_prefix: ""
+
+board_by_flow:
+  # Tiền và Tuân thủ (report.financial_periodic là ngoại lệ → đây)
+  content.review_requested: tien-tuan-thu
+  compliance.veto: tien-tuan-thu
+  compliance.legal_consult: tien-tuan-thu
+  compliance.anomaly_detected: tien-tuan-thu
+  budget.approval_needed: tien-tuan-thu
+  budget.soft_limit_reached: tien-tuan-thu
+  budget.hard_limit_breached: tien-tuan-thu
+  audit.findings: tien-tuan-thu
+  audit.anomaly_critical: tien-tuan-thu
+  audit.weekly_spotcheck_flag: tien-tuan-thu
+  whistleblowing.tip_received: tien-tuan-thu
+  report.financial_periodic: tien-tuan-thu
+  # Con người và Năng lực
+  agent.golive_approved: con-nguoi
+  agent.benchmark_passed: con-nguoi
+  agent.shadow_mode_cleared: con-nguoi
+  training.plan_ready: con-nguoi
+  training.retrain_completed: con-nguoi
+  # Điều hành, Họp và Báo cáo
+  incident.critical: dieu-hanh
+  report.okr_weekly_update: dieu-hanh
+  meeting.decision_recorded: dieu-hanh
+  meeting.convene_requested: dieu-hanh
+  meeting.schedule_triggered: dieu-hanh
+  meeting.turn.started: dieu-hanh
+  meeting.turn.submitted: dieu-hanh
+  meeting.closed: dieu-hanh
+  meeting.invitations_sent: dieu-hanh
+  org.structural_pattern_detected: dieu-hanh
+
+board_by_work_type:
+  report: dieu-hanh
+  operation: noi-bo
+  other: noi-bo
+
+board_by_unit: {}
+assignee_by_unit: {}
+kanban_url_template: "/kanban?board={board}&task={task_id}"

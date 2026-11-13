@@ -1,0 +1,45 @@
+# VÍ DỤ MẪU (không dùng mặc định): đơn vị định tuyến chỉ đạo của một công ty thương mại điện tử/SaaS.
+# Trước 09/11/2026 các đơn vị này được nạp sẵn vào mọi sổ công ty mới; nay chỉ là ví dụ để công ty tham khảo hoặc nhập vào sổ của mình.
+
+version: 2.0.0
+units:
+- slug: ky-thuat
+  display_name: Kỹ thuật
+  priority: 10
+  keywords: [\bkỹ thuật\b, \btech\b, \bdev\b, \btechnical\b, \boauth\b, \bapi\b, \bbackend\b, \bfrontend\b]
+- slug: tai-chinh
+  display_name: Tài chính
+  priority: 20
+  keywords: [\btài chính\b, \bfinance\b, \bkế toán\b, '\bq[1-4]\b']
+- slug: marketing
+  display_name: Marketing
+  priority: 30
+  keywords: [\bmarketing\b, \btruyền thông\b, \bcontent\b, \bquảng cáo\b, \bchiến dịch\b, \bcampaign\b, \bthương hiệu\b, \bbrand\b, \bseo\b]
+- slug: nhan-su
+  display_name: Nhân sự
+  priority: 40
+  keywords: [\bnhân sự\b, \bhr\b, \btuyển dụng\b]
+- slug: van-hanh
+  display_name: Vận hành
+  priority: 50
+  keywords: [\bvận hành\b, \bops\b, \boperation\b]
+- slug: sales
+  display_name: Kinh doanh
+  priority: 60
+  keywords: [\bkinh doanh\b, \bsales\b, \bbán hàng\b, \bđơn hàng\b, \bdoanh số\b, \bcrm\b, \blead\b, \bchốt đơn\b]
+- slug: customer_success
+  display_name: Chăm sóc khách hàng
+  priority: 70
+  keywords: [\bchăm sóc khách hàng\b, \bcustomer success\b, \bkhách hàng\b, \bhỗ trợ khách\b, \bhài lòng\b, \bchurn\b]
+- slug: tech_product
+  display_name: Kỹ thuật & Sản phẩm
+  priority: 80
+  keywords: [\bsản phẩm\b, \bproduct\b, \btính năng\b, \bfeature\b, \brelease\b, \bdeploy\b, \bđặc tả\b, \broadmap\b]
+- slug: qa
+  display_name: QA
+  priority: 90
+  keywords: [\bqa\b, \bkiểm thử\b, \bchất lượng\b, \btest case\b, \bhồi quy\b, \bkiểm định\b]
+- slug: finance
+  display_name: Tài chính
+  priority: 110
+  keywords: [\bngân sách\b, \bdòng tiền\b, \bhóa đơn\b, \bbudget\b, \binvoice\b, \bcashflow\b, \bchi phí\b]

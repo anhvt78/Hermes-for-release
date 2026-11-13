@@ -1,0 +1,118 @@
+# ============================================================
+# HERMES+ TASK / AGENT / EVENT STATE MACHINES — NGUỒN SỰ THẬT DUY NHẤT
+# [BỔ SUNG 28/08] Gom các enum trạng thái từng rải rác ở G.2
+# (task_contracts), G.3.3.3 (a2a_events), D7 (agent lifecycle)
+# về một nơi để mọi phần tham chiếu, tránh lệch tên gọi.
+# ============================================================
+version: "1.0.0"
+
+task_lifecycle:
+  # Kanban 9 trạng thái (khảo sát hermes-agent-main kanban_db.py) + review lane
+  states: ["backlog", "todo", "claimed", "in_progress", "blocked", "in_review", "pending_review", "done", "rejected"]
+  transitions:
+    - from: "claimed"
+      to: "in_progress"
+    - from: "in_progress"
+      to: "in_review"
+    - from: "in_review"
+      to: "pending_review"
+    - from: "pending_review"
+      to: ["done", "rejected"]
+      note: "Timeout: 24h nhắc người duyệt (A); 72h -> escalate. [Phụ lục V05] timeout agent-to-agent nên rút ngắn xuống phút/giờ, chỉ giữ thang giờ/ngày cho bước cần Chủ tịch quyết."
+  terminal_states: ["done", "rejected"]
+
+agent_lifecycle:
+  # [BỔ SUNG 28/08] Mở rộng D7 Onboarding Wizard — 4 giai đoạn cấu hình
+  # (Org/Budget/Policy/Sandbox) + 2 giai đoạn kiểm định còn thiếu trước
+  # đó (Benchmark, Shadow Mode), khớp PHẦN VII.2 cẩm nang tham chiếu.
+  states: ["design", "sandbox_benchmark", "shadow_mode", "independent_operation", "review", "retired"]
+  transitions:
+    - from: "design"
+      to: "sandbox_benchmark"
+      requires: "D7 bước 1-4 hoàn tất (Org Chart, Budget, Policy deny-by-default, Sandbox/A2A grant)"
+    - from: "sandbox_benchmark"
+      to: "shadow_mode"
+      requires: "benchmark_record.benchmark_passed == true (accuracy>=90%, scope_compliance=100%, prompt_injection_resistance=100%, latency trong SLA, cost_variance trong ±15%)"
+      emits_event: "agent.benchmark_passed"
+    - from: "shadow_mode"
+      to: "independent_operation"
+      requires: "shadow_mode_record.cleared_for_independence == true khi đủ bằng chứng công việc (số việc đã rà soát tối thiểu, tỷ lệ lỗi thấp), reviewer_agent_or_human đã duyệt >= 95% output"
+      emits_event: "agent.shadow_mode_cleared, agent.golive_approved"
+      approval: "T2 theo delegation-matrix.json (decision_type=new_agent_onboarding) — Chủ tịch + Compliance Agent"
+    - from: "independent_operation"
+      to: "review"
+      note: "Định kỳ (quý) hoặc khi có audit_findings nghiêm trọng"
+    - from: "review"
+      to: ["independent_operation", "shadow_mode", "retired"]
+      note: "Giữ nguyên / quay lại Shadow Mode để retrain / retire"
+  heartbeat_status: ["thức", "ngủ", "stale"]
+
+event_status:
+  # Trạng thái 1 event trong bảng a2a_events (G.3.3.3)
+  # [SỬA 31/08 — kiểm chứng Phòng Phân tích XT-08] Chốt 7 giá trị theo G.3.3.3
+  # (pending/delivered/processing/processed/failed/dlq/expired), thay 5 giá trị cũ
+  # (pending/delivered/acked/failed/dlq): bỏ 'acked' — Consumer xác nhận xong bằng
+  # 'processed'; bổ sung 'processing' (đang xử lý) + 'expired' (hết TTL).
+  # Đồng bộ: config/schemas/handover-event.schema.json status enum (5 -> 7).
+  states: ["pending", "delivered", "processing", "processed", "failed", "dlq", "expired"]
+  terminal_states: ["processed", "dlq", "expired"]
+  notes:
+    - "pending: producer vừa ghi, chưa dispatch"
+    - "delivered: consumer nhận (queue đã lấy)"
+    - "processing: consumer đang xử lý"
+    - "processed: consumer xử lý xong (thay 'acked')"
+    - "failed: lỗi không khôi phục được"
+    - "dlq: hết max_retries, chờ xem xét"
+    - "expired: quá TTL, không xử lý nữa"
+
+incident_severity:
+  # Dùng cho incident.* events — ánh xạ trực tiếp risk_tier, KHÔNG
+  # phải trường riêng (xem risk_tier_display_map bên dưới)
+  states: ["minor", "major", "critical"]
+  maps_to_risk_tier:
+    minor: "T1"
+    major: "T2"
+    critical: "T3"
+
+audit_finding_result:
+  # CHECK constraint trong audit_findings (G.1.3)
+  states: ["pass", "discrepancy", "critical", "pending_review"]
+
+# ============================================================
+# BẢNG QUY ĐỔI THỐNG NHẤT 4 HỆ PHÂN LOẠI KHẨN CẤP
+# [BỔ SUNG 28/08] Tương ứng G.3.2.3 trong tai-lieu-tich-hop.md.
+# risk_tier là trường GỐC duy nhất. Mọi hệ khác chỉ là hiển thị.
+# ============================================================
+risk_tier_display_map:
+  T0:
+    event_bus_priority: null   # T0 không qua giám sát SLA Event Bus
+    digest_icon: null          # không hiện trên Digest
+    comm_center_priority: "LOW"
+    meaning: "Tự động hoàn toàn, không cần theo dõi"
+    meaning_en: "Fully automated, no monitoring needed"
+  T1:
+    event_bus_priority: "NORMAL"
+    digest_icon: "🟢"
+    comm_center_priority: "NORMAL"
+    meaning: "Rủi ro trung bình, theo dõi định kỳ; người duyệt có thể là Kiểm soát viên tuân thủ (được uỷ quyền)"
+    meaning_en: "Medium risk, periodic monitoring; reviewer can be Compliance Officer (delegatable)"
+  T2:
+    event_bus_priority: "HIGH"
+    digest_icon: "🟡"
+    comm_center_priority: "NORMAL (nâng URGENT nếu quá SLA)"
+    meaning: "Rủi ro cao — bắt buộc Chủ tịch + Kiểm soát viên tuân thủ (2 lớp kiểm tra, KHÔNG uỷ quyền được vì Chủ tịch là 1 trong 2 lớp)"
+    meaning_en: "High risk — mandatory Chairman + Compliance Officer (2-layer check, non-delegatable since Chairman is one of the two layers)"
+  T3:
+    event_bus_priority: "CRITICAL"
+    digest_icon: "🔴"
+    comm_center_priority: "URGENT"
+    meaning: "Rủi ro rất cao — bắt buộc một mình Chủ tịch, cấm uỷ quyền, cấm tự động"
+    meaning_en: "Very high risk — Chairman alone, delegation forbidden, automation forbidden"
+
+validation_rule: >
+  Agent PHẢI đọc risk_tier từ nguồn duy nhất (task_contracts.risk_tier hoặc
+  a2a_events.risk_tier) rồi tính hiển thị qua bảng risk_tier_display_map ở
+  trên. Agent KHÔNG được tự gán event_bus_priority/digest_icon/
+  comm_center_priority độc lập với risk_tier — vi phạm nguyên tắc
+  transparency trong constitution.yaml và sẽ bị audit-agent gắn cờ
+  discrepancy.

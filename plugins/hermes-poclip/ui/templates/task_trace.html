@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Trace View (D8) — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .trace-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+    .trace-header {
+      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+    .trace-header h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }
+    .trace-header p  { margin: 0; font-size: 0.9rem; opacity: 0.85; }
+    .trace-form {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+    .trace-form label { font-size: 0.8rem; font-weight: 600; color: #64748b; display: block; margin-bottom: 0.25rem; }
+    .trace-form input, .trace-form select {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.9rem;
+      min-width: 160px;
+    }
+    .trace-form .form-group { display: flex; flex-direction: column; }
+    .trace-form button {
+      background: #7c3aed;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .trace-form button:hover { background: #6d28d9; }
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.75rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e2e8f0;
+    }
+    .timeline-item {
+      position: relative;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.65rem;
+      top: 1.1rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #7c3aed;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #7c3aed;
+    }
+    .tl-top { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+    .tl-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+    .badge-kanban   { background: #dbeafe; color: #1d4ed8; }
+    .badge-comm_log { background: #d1fae5; color: #065f46; }
+    .badge-audit_log{ background: #fef3c7; color: #92400e; }
+    .tl-ts   { font-size: 0.78rem; color: #94a3b8; }
+    .tl-actor{ font-size: 0.8rem;  color: #475569; font-weight: 600; }
+    .tl-action{ font-size: 0.95rem; font-weight: 700; color: #1e293b; }
+    .tl-detail{ font-size: 0.85rem; color: #64748b; margin-top: 0.3rem; }
+    .tl-evidence{ font-size: 0.82rem; margin-top: 0.3rem; }
+    .tl-evidence a { color: #7c3aed; }
+    .tl-states { display: flex; gap: 0.5rem; margin-top: 0.4rem; align-items: center; }
+    .tl-state-chip {
+      font-size: 0.75rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #334155;
+    }
+    .tl-arrow { color: #94a3b8; font-size: 0.8rem; }
+    .banner {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .banner-warn { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+    .banner-err  { background: #fee2e2; border: 1px solid #f87171; color: #991b1b; }
+    .banner-info { background: #dbeafe; border: 1px solid #93c5fd; color: #1e40af; }
+    .sources-bar {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      font-size: 0.82rem;
+      color: #475569;
+    }
+    .sources-bar span { font-weight: 600; }
+    #empty-state { text-align: center; color: #94a3b8; padding: 3rem 0; font-size: 1rem; }
+    #loading { text-align: center; color: #7c3aed; padding: 1.5rem 0; }
+  </style>
+</head>
+<body>
+<div class="trace-container">
+  <div class="trace-header">
+    <h1>📋 Task Trace View (D8)</h1>
+    <p>Xem dòng thời gian đầy đủ của một công việc từ 3 nguồn: Kanban · Liên lạc · Audit</p>
+  </div>
+
+  <div class="trace-form">
+    <div class="form-group">
+      <label for="inp-task-id">Task ID</label>
+      <input id="inp-task-id" type="text" placeholder="task-abc-123">
+    </div>
+    <div class="form-group">
+      <label for="inp-corr-id">Correlation ID</label>
+      <input id="inp-corr-id" type="text" placeholder="evt_20260830_...">
+    </div>
+    <div class="form-group">
+      <label for="inp-source">Nguồn</label>
+      <select id="inp-source">
+        <option value="all">Tất cả</option>
+        <option value="kanban">📋 Kanban</option>
+        <option value="comm_log">💬 Liên lạc</option>
+        <option value="audit_log">🛡️ Audit</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="inp-limit">Giới hạn</label>
+      <input id="inp-limit" type="number" value="200" min="1" max="1000" style="width:80px">
+    </div>
+    <button onclick="loadTrace()">Xem dòng thời gian</button>
+  </div>
+
+  <div id="status-banner"></div>
+  <div id="sources-bar"></div>
+  <div id="loading" style="display:none">Đang tải...</div>
+  <div id="timeline-container"></div>
+</div>
+
+<script src="/static/js/trace.js"></script>
+</body>
+</html>

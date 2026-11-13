@@ -1,0 +1,201 @@
+# ============================================================
+# HERMES+ EVENT TOPICS — NGUỒN SỰ THẬT DUY NHẤT
+# [BỔ SUNG 28/08] Trước đây G.3.2.1 liệt 20 luồng + topic ngay
+# trong văn bản tai-lieu-tich-hop.md — không có 1 file tập trung
+# nào để agent tra cứu/validate. File này là nơi DUY NHẤT định
+# nghĩa topic hợp lệ. Agent PHẢI reject event có topic không có
+# trong danh sách này (xem config/README.md — Quy tắc Validate & Reject).
+# ============================================================
+# [10/11/2026 — Chủ tịch duyệt «dọn lõi»] File này CHỈ chứa chủ đề DÙNG CHUNG cho mọi công ty; bên gửi/nhận là đơn vị LÕI hoặc «*».
+# Chủ đề riêng của một loại công ty KHÔNG nằm ở đây: đặt trong bản phác thảo của ngành (config/blueprints/<ngành>.yaml, mục event_topics)
+# hoặc thư mục mẫu (config/sample-companies/<tên>/event-topics.yaml). Mẫu thương mại điện tử: sample-companies/ecommerce.
+version: "1.1.0"
+schema_ref: "config/schemas/handover-event.schema.json"
+
+topics:
+
+  # --- Sự cố / khẩn cấp ---
+  - name: "incident.critical"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive", "chairman_human"]
+    default_risk_tier: "T3"
+    sla_seconds: 60
+
+  # --- Tuân thủ / pháp lý (bên gửi «*» = bất kỳ đơn vị nào của công ty) ---
+  - name: "content.review_requested"
+    producer_clusters: ["*"]
+    consumer_clusters: ["compliance"]
+    default_risk_tier: "T1"
+    sla_seconds: 30
+  - name: "compliance.veto"
+    producer_clusters: ["compliance"]
+    consumer_clusters: ["executive", "*"]
+    default_risk_tier: "T3"
+    sla_seconds: 10
+  - name: "compliance.legal_consult"
+    producer_clusters: ["*"]
+    consumer_clusters: ["compliance"]
+    default_risk_tier: "T1"
+    sla_seconds: 300
+
+  # --- Tài chính / ngân sách ---
+  - name: "report.financial_periodic"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T0"
+    sla_seconds: 600
+  - name: "compliance.anomaly_detected"
+    producer_clusters: ["*"]
+    consumer_clusters: ["compliance"]
+    default_risk_tier: "T2"
+    sla_seconds: 60
+  - name: "budget.approval_needed"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T2"
+    sla_seconds: 300
+  - name: "budget.soft_limit_reached"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T1"
+    sla_seconds: 60
+  - name: "budget.hard_limit_breached"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive", "chairman_human"]
+    default_risk_tier: "T3"
+    sla_seconds: 1
+
+  # --- Nhân sự (vòng đời nhân viên AI) ---
+  - name: "hr.onboarding_provision"
+    producer_clusters: ["hr_core"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T1"
+    sla_seconds: 900
+  - name: "hr.role_change"
+    producer_clusters: ["hr_core"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T1"
+    sla_seconds: 1800
+  - name: "agent.golive_approved"
+    producer_clusters: ["hr_core"]
+    consumer_clusters: ["executive"]      # [12/11/2026] trước đây ["hr_core"] (tự gửi cho chính Nhân sự → không ai nhận); cùng chiều với 2 sự kiện anh em benchmark_passed / shadow_mode_cleared
+    default_risk_tier: "T2"
+    sla_seconds: null
+    note: "[BỔ SUNG 28/08] Phát khi lifecycle_stage chuyển sang independent_operation — bắt buộc kèm benchmark_record + shadow_mode_record hợp lệ"
+  - name: "agent.benchmark_passed"
+    producer_clusters: ["hr_core"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "[BỔ SUNG 28/08] D7 bước Sandbox/Benchmark"
+  - name: "agent.shadow_mode_cleared"
+    producer_clusters: ["hr_core"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "[BỔ SUNG 28/08] D7 bước Shadow Mode"
+
+  # --- Training (lỗi #2 — BỔ SUNG) ---
+  - name: "training.plan_ready"
+    producer_clusters: ["training"]
+    consumer_clusters: ["hr_core", "executive"]
+    default_risk_tier: "T1"
+    sla_seconds: 900
+    note: "Kế hoạch đào tạo sẵn sàng — training-lead-agent phát khi hoàn tất plan"
+  - name: "training.retrain_completed"
+    producer_clusters: ["training"]
+    consumer_clusters: ["hr_core", "executive"]
+    default_risk_tier: "T1"
+    sla_seconds: 1800
+    note: "Hoàn tất retrain — phát khi agent-lifecycle kết thúc vòng review/retrain"
+
+  # --- Audit (luồng 14-15) ---
+  - name: "audit.findings"
+    producer_clusters: ["audit"]
+    consumer_clusters: ["chairman_human"]
+    default_risk_tier: "T2"
+    sla_seconds: 300
+  - name: "audit.anomaly_critical"
+    producer_clusters: ["audit"]
+    consumer_clusters: ["executive", "chairman_human"]
+    default_risk_tier: "T3"
+    sla_seconds: 120
+  - name: "audit.weekly_spotcheck_flag"
+    producer_clusters: ["audit"]
+    consumer_clusters: ["chairman_human"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "[BỔ SUNG 28/08] Cờ ⚠ đính kèm weekly_reports khi spot-check lệch — G.4.3.3"
+
+  # --- Tech / sản phẩm (luồng 17) ---
+
+  # --- Báo cáo định kỳ (luồng 18) ---
+  - name: "report.okr_weekly_update"
+    producer_clusters: ["executive"]
+    consumer_clusters: ["*"]
+    default_risk_tier: "T0"
+    sla_seconds: 600
+
+  # --- Whistleblowing (G.1.6, phụ lục V04 chống lạm dụng) ---
+  - name: "whistleblowing.tip_received"
+    producer_clusters: ["*", "external_anonymous"]
+    consumer_clusters: ["audit", "compliance"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "[Phụ lục V04] Áp giới hạn tần suất theo kênh/thiết bị trước khi publish lên bus — chống DoS bằng tip giả"
+
+  # --- Meeting Room (Phần E) ---
+  - name: "meeting.decision_recorded"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive", "chairman_human"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+  - name: "meeting.convene_requested"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive", "chairman_human"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Người triệu tập (content_chair/admin) yêu cầu mở phiên họp — Phần E"
+  - name: "meeting.schedule_triggered"
+    producer_clusters: ["executive"]
+    consumer_clusters: ["*"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Session Controller kích hoạt lịch họp — Phần E"
+  - name: "meeting.turn.started"
+    producer_clusters: ["executive"]
+    consumer_clusters: ["*"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Bắt đầu lượt phát biểu trong phiên họp — Phần E"
+  - name: "meeting.turn.submitted"
+    producer_clusters: ["*"]
+    consumer_clusters: ["executive"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Một lượt phát biểu được nộp — Phần E"
+  - name: "meeting.closed"
+    producer_clusters: ["executive"]
+    consumer_clusters: ["*", "chairman_human"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Phiên họp kết thúc — Phần E"
+  - name: "meeting.invitations_sent"
+    producer_clusters: ["executive"]
+    consumer_clusters: ["*"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Thư mời họp đã gửi — trạng thái draft -> invited (tai-lieu-tich-hop.md Phần E)"
+
+  # --- Chẩn đoán cơ cấu tổ chức (G.4.5, [BỔ SUNG 28/08]) ---
+  - name: "org.structural_pattern_detected"
+    producer_clusters: ["executive"]
+    consumer_clusters: ["chairman_human"]
+    default_risk_tier: "T1"
+    sla_seconds: null
+    note: "Phát mỗi quý bởi org-health-analyzer — xem G.4.5 Chẩn đoán Cơ cấu Tổ chức"
+
+naming_convention:
+  pattern: "<domain>.<event_past_tense_or_state>"
+  domains_in_use: ["lead", "customer", "order", "incident", "content", "compliance", "budget", "hr", "agent", "audit", "product", "report", "whistleblowing", "meeting", "org", "training"]
+  rule: "Agent KHÔNG được tự đặt domain mới hoặc event mới ngoài danh sách trên. Đề xuất domain/topic mới phải qua CEO Agent -> Chủ tịch phê duyệt (xem config/README.md bảng Change Management)."

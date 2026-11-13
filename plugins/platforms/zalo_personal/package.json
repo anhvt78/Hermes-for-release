@@ -1,0 +1,9 @@
+{
+  "name": "hermes-zalo-personal-sidecar",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "dependencies": { "zca-js": "2.1.2" },
+  "scripts": {}
+}

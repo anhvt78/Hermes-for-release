@@ -1,0 +1,41 @@
+comm_log_rbac:
+  roles:
+    hermes_agents:
+      permissions: [insert, select]
+      description: "Agent chính — ghi và đọc comm_log"
+    hermes_readonly:
+      permissions: [select]
+      description: "Read-only — chỉ đọc comm_log"
+    auditor:
+      permissions: [select, insert_correction]
+      description: "Kiểm toán — đọc + ghi correction"
+    owner:
+      permissions: [insert, select]
+      redaction: none
+      description: "Owner — full log không redact"
+    admin:
+      permissions: [insert, select, delete]
+      redaction: none
+      description: "Admin — full access không redact"
+    viewer:
+      permissions: [select]
+      redaction: pii
+      description: "Viewer thường — summary đã redact PII"
+    cron:
+      permissions: [insert, select]
+      description: "Cron system — ghi digest + đọc"
+
+redaction:
+  money_threshold_vnd: 1000000
+  mask_patterns:
+    - email
+    - phone_vn
+    - large_number
+  on_miss: log_warning
+  error_code: ERR-TB03-006
+
+coverage:
+  target_percent: 95
+  sample_size: 100
+  check_interval_hours: 24
+  alert_code: ERR-TB03-003
