@@ -1,0 +1,33 @@
+# ============================================================
+# THAM SỐ MẶC ĐỊNH — DANH SÁCH HÀNH VI BỊ CHẶN TUYỆT ĐỐI (Compliance)
+# [BỔ SUNG — D0.5] Gói kiến thức nền compliance-agent nạp sẵn TRƯỚC
+# khi công ty thêm luật riêng theo ngành (vd. công ty tài chính
+# thêm quy định KYC/AML, công ty y tế thêm HIPAA-tương-đương...).
+# ============================================================
+component: "compliance-agent"
+version: "1.0.0"
+knowledge_baseline_pack_id: "core-baseline-compliance-v1"
+
+universal_forbidden_actions_default:
+  # Áp dụng mọi công ty — company_overrides chỉ được PHÉP THÊM,
+  # không được BỚT khỏi danh sách này (hard_floor toàn bộ mục này).
+  hard_floor: true
+  items:
+    - "make_false_or_misleading_claims_to_customers"
+    - "collect_personal_data_without_stated_purpose"
+    - "discriminate_based_on_protected_attributes"
+    - "share_customer_data_with_third_party_without_consent"
+    - "misrepresent_pricing_or_hide_mandatory_fees"
+    - "impersonate_a_human_when_directly_asked_if_ai"
+
+industry_specific_overrides_pending:
+  description: "Công ty tự thêm luật riêng theo ngành vào company-config/compliance-overrides.yaml — hệ thống core không giả định trước ngành nào"
+  examples_only:
+    - domain: "fintech"
+      example_additions: ["kyc_verification_before_transaction_above_threshold", "aml_suspicious_pattern_reporting"]
+    - domain: "healthcare_adjacent"
+      example_additions: ["phi_data_handling_restrictions", "no_medical_diagnosis_claims"]
+
+kpi_veto_response_time:
+  target_seconds: 10
+  hard_floor_seconds: 5

@@ -1,0 +1,711 @@
+version: "1.0.0"
+schema_ref: "config/taxonomy/monitor-tiers.yaml (self-contained; validated by hermes_poclip.monitoring.registry.validate_registry)"
+
+incident_classes:
+  # ── T1: Hệ thống (2.1–2.3) ─────────────────────────────────────────────────
+
+  - incident_class: "service_process_chet"
+    name: "Service/process chết"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Restart service đúng unit systemd --user, kiểm tra cgroup, verify trạng thái, ghi ops.db (doc 2.1)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "2.1"
+
+  - incident_class: "errors_log_moi"
+    name: "Errors log mới"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Phân tích stack trace, xác định root cause, patch/rollback nếu trong thẩm quyền, ghi ops.db (doc 2.2)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "2.2"
+
+  - incident_class: "cron_db_loi"
+    name: "Cron/DB lỗi"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Kiểm tra cron log, kiểm tra DB integrity, retry/reschedule nếu trong thẩm quyền, ghi ops.db (doc 2.3)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "2.3"
+
+  # ── T2: Vận hành (2.4–2.10) ─────────────────────────────────────────────────
+
+  - incident_class: "task_blocked_lan_dau"
+    name: "Task bị block lần đầu"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Xác định blocker, liên hệ owner task liên quan, cập nhật trạng thái kanban, ghi comm_log (doc 2.4)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "2.4"
+
+  - incident_class: "task_blocked_loop"
+    name: "Task blocked vòng lặp (đẩy GD)"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Phân tích vòng lặp block, đề xuất giải pháp, leo thang GD nếu vượt thẩm quyền, ghi ops.db (doc 2.5)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "2.5"
+
+  - incident_class: "task_cho_reset"
+    name: "Task chờ reset"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Xác nhận cần reset, thực hiện reset theo quy trình, ghi audit trail (doc 2.6)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "2.6"
+
+  - incident_class: "task_ket_heartbeat"
+    name: "Task kẹt heartbeat"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Kiểm tra heartbeat signal, ping agent, timeout/kill nếu cần, ghi ops.db (doc 2.7)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "2.7"
+
+  - incident_class: "gateway_dung"
+    name: "Gateway dừng"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Restart gateway, kiểm tra upstream, verify routing, ghi ops.db (doc 2.8)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "2.8"
+
+  - incident_class: "trat_tu_task"
+    name: "Trật tự task"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Rà soát thứ tự ưu tiên, reorder nếu cần, báo cáo tình trạng (doc 2.9)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 1.0
+    info_package_required: false
+    doc_ref: "2.9"
+
+  - incident_class: "ton_dong_task"
+    name: "Tồn đọng task"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Đánh giá tồn đọng, nhắc hạn owner, đề xuất phân công lại (doc 2.10)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[NHAC HAN]"
+      sla_hours: 1.0
+    info_package_required: false
+    doc_ref: "2.10"
+
+  # ── T3: Nghiệp vụ (2.11–2.12) ───────────────────────────────────────────────
+
+  - incident_class: "de_xuat_chot_done"
+    name: "Đề xuất chốt done"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Xem xét tiêu chí done, xác nhận hoặc trả lại, ghi quyết định (doc 2.11)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[DE XUAT]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "2.11"
+
+  - incident_class: "quyet_dinh_nghiep_vu"
+    name: "Quyết định nghiệp vụ"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Thu thập thông tin, phân tích, ra quyết định nghiệp vụ, ghi comm_log (doc 2.12)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "2.12"
+
+  # ── Phụ lục / repo-specific ─────────────────────────────────────────────────
+
+  - incident_class: "ban_va"
+    name: "Ban vá (patch emergency)"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Áp dụng hotfix theo quy trình khẩn, kiểm tra regression, ghi ops.db (Phần 1 T1 mục 2)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "Phần 1 T1 mục 2"
+
+  - incident_class: "plugin_loi"
+    name: "Plugin lỗi"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Tắt plugin lỗi, fallback graceful, thông báo owner, ghi ops.db (Phần 1 T1 mục 3)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "Phần 1 T1 mục 3"
+
+  - incident_class: "tai_nguyen"
+    name: "Tài nguyên (CPU/RAM/disk)"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Thu thập metrics tài nguyên, cảnh báo nếu vượt ngưỡng, báo cáo trend (Phần 1 T1 mục 6)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 1.0
+    info_package_required: false
+    doc_ref: "Phần 1 T1 mục 6"
+
+  - incident_class: "tool_health"
+    name: "Tool health check"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Ping công cụ, kiểm tra response, fallback nếu tool down, ghi ops.db (Phần 1 T1 mục 7)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "Phần 1 T1 mục 7"
+
+  - incident_class: "meeting_agent_timeout"
+    name: "Meeting agent/session timeout"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Phát hiện timeout agent/session, ghi log, thông báo session controller (repo-specific watchdog)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "repo-specific (watchdog agent/session timeout)"
+
+  - incident_class: "event_delivery"
+    name: "Event delivery (a2a pending/stuck/DLQ/SLA breach)"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Kiểm tra event bus queue, retry/DLQ handling, xác nhận delivery, ghi ops.db (repo-specific)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "repo-specific (a2a pending/stuck/DLQ/SLA breach)"
+
+  - incident_class: "todo_triage_ket"
+    name: "Todo/triage kẹt"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Rà soát todo queue, triage items kẹt, escalate nếu cần (doc 2.4/2.7 phụ)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "doc 2.4/2.7 phụ"
+
+  - incident_class: "worker_blocked_root_cause"
+    name: "Worker blocked — phân tích root cause"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Phân tích root cause worker blocked, đề xuất giải pháp cấp độ nghiệp vụ (Phần 1 T3 mục 3)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 3"
+
+  - incident_class: "waiting_review_sla"
+    name: "Waiting review SLA"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Nhắc nhở reviewer, ghi lịch sử, leo thang nếu SLA breach (doc 2.11 — bản chất T3 dù file ở comm/)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[NHAC HAN]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "doc 2.11"
+
+  - incident_class: "duyet_done"
+    name: "Duyệt done"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Xem xét kết quả done, phê duyệt hoặc reject, ghi quyết định (Phần 1 T3 mục 1)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[DUYET]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 1"
+
+  - incident_class: "vi_pham_quy_trinh"
+    name: "Vi phạm quy trình"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "tuan_thu"
+    in_scope_action: "Xác định vi phạm, ghi biên bản, đề xuất xử lý, báo cáo GD (Phần 1 T3 mục 4)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 4"
+
+  - incident_class: "su_co_milestone"
+    name: "Sự cố milestone"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Đánh giá tác động milestone, điều chỉnh kế hoạch, báo cáo GD (Phần 1 T3 mục 5)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 5"
+
+  - incident_class: "logic_nghiep_vu_sai"
+    name: "Logic nghiệp vụ sai"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "dieu_hanh_cap_cao"
+    in_scope_action: "Phân tích logic sai, đề xuất correction, ghi quyết định GD (Phần 1 T3 mục 6)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 6"
+
+  - incident_class: "chi_phi_ha_tang"
+    name: "Chi phí hạ tầng vượt ngưỡng"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "kiem_toan_noi_bo"
+    in_scope_action: "Đánh giá chi phí, ghi biên bản, leo thang Chủ tịch nếu vượt 1tr/lần hoặc 3tr/tháng (Phần 1 T3 mục 7 + 5.2.1)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "dm_575801989"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 2.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 7 + 5.2.1"
+
+  - incident_class: "kien_truc_lon"
+    name: "Kiến trúc lớn (luôn đẩy Chủ tịch)"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "vp-giam-doc"
+    role_key: "kiem_soat_chat_luong"
+    in_scope_action: "Trình bày kiến trúc, thu thập phản hồi Chủ tịch, ghi biên bản quyết định (Phần 1 T3 mục 8)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "dm_575801989"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 24.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 8"
+
+  - incident_class: "gd_khong_xu_ly_48h"
+    name: "GD không xử lý 48h (Ban KS leo thang)"
+    monitor_layer: "T3_NGHIEP_VU"
+    owning_role: "ban-kiem-soat"
+    role_key: "kiem_toan_noi_bo"
+    in_scope_action: "Leo thang Ban Kiểm soát sau 48h GD không xử lý, ghi biên bản, thông báo Chủ tịch (Phần 1 T3 mục 9)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "dm_575801989"
+      task_prefix: "[BAO CAO]"
+      sla_hours: 48.0
+    info_package_required: true
+    doc_ref: "Phần 1 T3 mục 9"
+
+  # ── (MỚI 07/09 — Chủ tịch duyệt, sự cố dispatcher chết 07/09) Watchdog kanban ──
+  # Sự cố gốc: dispatcher chết (dispatch_in_gateway: false + timer cũ deprecated) → task ready
+  # nằm im vô hạn, giám sát cũ không phát hiện. Bổ sung 2 loại sự cố: task READY kẹt không được
+  # xử lý (T2 — vp-giam-sat) + dispatcher chết/không spawn (T1 — ht-truong-phong).
+
+  - incident_class: "task_ready_ket"
+    name: "Task READY kẹt không được xử lý"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Kiểm tra dispatcher/concurrency cap, liên hệ Trưởng phòng sở hữu, thực hiện dispatch lại hoặc phân công lại, ghi comm_log (doc 2.13)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "2.13"
+
+  - incident_class: "dispatcher_chet"
+    name: "Dispatcher chết / không spawn"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Kiểm tra gateway dispatch_in_gateway (phải true), restart gateway/process dispatcher, verify task ready được spawn, ghi ops.db (doc 2.14)"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[SU CO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "2.14"
+
+  # ── Hai lớp MỚI v47 ─────────────────────────────────────────────────────────
+
+  - incident_class: "phien_hop_ket"
+    name: "Phiên họp bị kẹt"
+    monitor_layer: "T2_VAN_HANH"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Kiểm tra trạng thái phiên họp, ping session controller, đóng phiên kẹt, ghi ops.db"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 1.0
+    info_package_required: true
+    doc_ref: "scan_findings.py:90"
+
+  - incident_class: "cap_phat_ket"
+    name: "Tác vụ cấp phát agent bị kẹt"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "ht-truong-phong"
+    role_key: "ha_tang"
+    in_scope_action: "Kiểm tra provisioning queue, retry/cancel job kẹt, ghi ops.db"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "scan_findings.py:108"
+
+  - incident_class: "agent_du_phong_han_muc"
+    name: "Nhân sự AI chuyển model dự phòng do hạn mức"
+    monitor_layer: "T1_HE_THONG"
+    owning_role: "vp-giam-sat"
+    role_key: "van_hanh"
+    in_scope_action: "Kiểm tra quota nhà cung cấp, xác nhận dự phòng đã hoạt động, ghi ops.db"
+    escalation_rule:
+      escalate_conditions:
+        - "recurrence_ge_2"
+        - "root_cause_unknown"
+        - "exceeds_authority"
+        - "affects_other_layers"
+        - "project_stop_risk"
+        - "no_approved_process"
+        - "sla_exceeded"
+      channel: "board_kiem_soat"
+      task_prefix: "[CANH BAO]"
+      sla_hours: 0.5
+    info_package_required: true
+    doc_ref: "monitoring/fallback_watchdog.py"

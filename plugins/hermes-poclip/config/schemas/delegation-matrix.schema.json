@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hermes-poclip.internal/schemas/delegation-matrix.schema.json",
+  "title": "Hermes+ Delegation of Authority Matrix",
+  "description": "delegation-matrix.json phải conform schema này. Tham chiếu D3/D4, F.3.3 (bảng risk_tier T0-T3), G.2 RACI.",
+  "type": "object",
+  "required": ["version", "currency", "rules"],
+  "properties": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "currency": { "type": "string", "enum": ["VND"] },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["decision_type", "risk_tier", "threshold_vnd", "lead_agent", "ceo_agent", "compliance_agent", "chairman_human"],
+        "properties": {
+          "decision_type": { "type": "string" },
+          "risk_tier": {
+            "type": "string",
+            "enum": ["T0", "T1", "T2", "T3"],
+            "description": "[BỔ SUNG 28/08] Bắt buộc — mọi rule phải gắn risk_tier để đồng bộ với D4 Approval Queue và bảng quy đổi G.3.2.3"
+          },
+          "threshold_vnd": { "type": ["number", "null"] },
+          "lead_agent": { "type": "string", "enum": ["none", "auto_approve", "propose_only"] },
+          "ceo_agent": { "type": "string", "enum": ["none", "auto_approve", "notify_only", "propose_only", "mandatory_approval"] },
+          "compliance_agent": {
+            "type": "string",
+            "enum": ["none", "review_required", "veto_eligible"],
+            "description": "[BỔ SUNG 28/08] Bắt buộc với risk_tier T2 (Chủ tịch + Compliance Agent — 2 lớp kiểm tra, không phải 2 người, xem F.6.3)"
+          },
+          "chairman_human": { "type": "string", "enum": ["none", "notify_only", "mandatory_approval"] },
+          "reviewer_model_diversity_required": {
+            "type": "boolean",
+            "description": "[Phụ lục V02] true bắt buộc khi risk_tier là T2 hoặc T3"
+          },
+          "_note": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "_ref": { "type": "string" }
+  },
+  "additionalProperties": false
+}

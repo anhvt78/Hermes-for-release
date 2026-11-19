@@ -1,0 +1,34 @@
+# Ghép các khóa này vào config.yaml của profile riêng.
+agent:
+  disabled_toolsets:
+    - web
+    - search
+    - vision
+    - terminal
+    - file
+    - browser
+    - cronjob
+    - skills
+    - memory
+    - delegation
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+gateway:
+  platforms:
+    zalo_personal:
+      enabled: true
+      # Điền sau khi đã lấy User ID của người quản trị/test.
+      home_channel:
+        platform: zalo_personal
+        chat_id: "ID_NGUOI_QUAN_TRI"
+        name: "Quản trị Zalo"
+      extra:
+        # Rỗng = không trả lời DM nào cho đến khi bạn chủ động thêm ID.
+        allowed_users: []
+        # Rỗng = không trả lời nhóm nào cho đến khi bạn chủ động thêm ID.
+        allowed_groups: {}
+        require_mention: true
+        handoff_seconds: 86400
+platform_toolsets:
+  zalo_personal: []

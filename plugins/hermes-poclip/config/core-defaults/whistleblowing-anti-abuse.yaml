@@ -1,0 +1,24 @@
+# ============================================================
+# THAM SỐ MẶC ĐỊNH — CHỐNG LẠM DỤNG KÊNH TỐ GIÁC (Phụ lục V04)
+# ============================================================
+component: "whistleblowing-channel"
+version: "1.0.0"
+
+parameters:
+  max_tips_per_channel_per_hour:
+    default: 5
+    min_allowed: 1
+    max_allowed: null
+    description: "Giới hạn số tip nhận từ 1 kênh/thiết bị (không cần biết danh tính) trong 1 giờ trước khi vào hàng đợi ưu tiên thấp"
+
+  min_corroboration_sources_before_escalate:
+    default: 2
+    min_allowed: 1
+    max_allowed: null
+    description: "Số nguồn độc lập tối thiểu trước khi 1 tip chưa kèm bằng chứng được escalate thẳng lên Chủ tịch thay vì vào hàng đợi Audit Agent xử lý bình thường"
+
+  duplicate_content_similarity_threshold_pct:
+    default: 80
+    min_allowed: 50
+    max_allowed: 100
+    description: "Ngưỡng tương đồng nội dung để coi 2 tip là trùng lặp (chống spam cùng nội dung từ nhiều kênh giả)"

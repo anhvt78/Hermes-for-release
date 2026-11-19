@@ -1,0 +1,13 @@
+{
+  "name": "hermes-poclip-policy",
+  "label": "Chính sách",
+  "labels": {"vi": "Chính sách", "en": "Policy"},
+  "description": "Cấu hình chính sách (Tool Policy / A2A Grants / Sandbox / Channel Bindings / Routing / Operations) của hermes-poclip. Hiển thị trên nav chính trong nhóm Plugins. Ngoài nav, vẫn vào được từ menu ⋮ → Policy config của trang Profiles (điều hướng tới /hermes-poclip/policy?profile=<tên>) — khi không có ?profile thì mở PolicyConfig với profileFilter rỗng (xem tất cả).",
+  "icon": "Shield",
+  "version": "1.40.0",
+  "tab": {
+    "path": "/hermes-poclip/policy",
+    "position": "end"
+  },
+  "entry": "dist/index.js"
+}

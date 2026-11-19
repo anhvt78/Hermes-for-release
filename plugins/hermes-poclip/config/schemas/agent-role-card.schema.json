@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hermes-poclip.internal/schemas/agent-role-card.schema.json",
+  "title": "Hermes+ Agent Role Card",
+  "description": "Mọi file trong config/agents/*.json phải conform schema này. Tham chiếu tai-lieu-tich-hop.md Phần D5 (Policy Config), G.2 (RACI/DoD), G.1 (Audit Agent).",
+  "type": "object",
+  "required": [
+    "agent_id", "version", "role_type", "reports_to", "cluster", "status",
+    "lifecycle_stage", "objective", "kpis", "io_contract", "tools",
+    "authority", "escalation_rules", "sandbox_mode", "risk_tier_default"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "profile_id/agent_id của agent do Genesis sinh ở D0.5 có dạng \"<cluster_id>-agent-N\" (và id phòng ban Lead là \"<cluster_id>-lead-agent\"), mà cluster_id hợp lệ theo pattern của chính schema này (\"^[a-z][a-z0-9_]*$\") CÓ THỂ chứa dấu gạch dưới (vd tech_product, customer_success) — nên agent_id bắt buộc phải chấp nhận cả \"_\" để luôn khớp ĐÚNG profile_id thật trên org_nodes (điều kiện để nối thẻ với vị trí và để sync_org_from_role_cards upsert đúng dòng thay vì tạo dòng trùng)."
+    },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "role_type": { "type": "string", "enum": ["orchestrator", "lead", "worker", "independent_control"] },
+    "reports_to": {
+      "type": "string",
+      "description": "profile_id hoặc 'chairman_human'. Audit Agent PHẢI = 'chairman_human' trực tiếp (G.1.1.1, không qua CEO)."
+    },
+    "cluster": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "[HIỆU CHỈNH] KHÔNG còn là enum đóng — giá trị phải khớp 1 id trong config/taxonomy/clusters.yaml (core_clusters hoặc variable_clusters đang active của công ty). Validate chéo file này bằng script/CI, không hardcode danh sách trong schema — đây chính là điểm mở kiến trúc cho nhiều loại hình công ty."
+    },
+    "status": { "type": "string", "enum": ["sandbox", "shadow_mode", "active", "paused", "retired"] },
+    "lifecycle_stage": {
+      "type": "string",
+      "enum": ["design", "sandbox_benchmark", "shadow_mode", "independent_operation", "review", "retired"],
+      "description": "[BỔ SUNG 28/08] Vòng đời đầy đủ theo D7 mở rộng — không được nhảy thẳng design -> independent_operation."
+    },
+    "benchmark_record": {
+      "type": ["object", "null"],
+      "description": "[BỔ SUNG 28/08] Bắt buộc có trước khi lifecycle_stage chuyển sang shadow_mode.",
+      "properties": {
+        "accuracy_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "scope_compliance_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "prompt_injection_resistance_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "latency_within_sla": { "type": "boolean" },
+        "cost_variance_pct": { "type": "number" },
+        "benchmark_passed": { "type": "boolean" },
+        "benchmarked_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["accuracy_pct", "scope_compliance_pct", "prompt_injection_resistance_pct", "latency_within_sla", "cost_variance_pct", "benchmark_passed"]
+    },
+    "shadow_mode_record": {
+      "type": ["object", "null"],
+      "description": "[BỔ SUNG 28/08] Bắt buộc có trước khi lifecycle_stage chuyển sang independent_operation.",
+      "properties": {
+        "started_at": { "type": "string", "format": "date-time" },
+        "ends_at": { "type": "string", "format": "date-time" },
+        "reviewer_agent_or_human": { "type": "string" },
+        "outputs_reviewed": { "type": "integer" },
+        "error_rate_pct": { "type": "number" },
+        "cleared_for_independence": { "type": "boolean" }
+      },
+      "required": ["started_at", "reviewer_agent_or_human", "cleared_for_independence"]
+    },
+    "objective": {
+      "type": "object",
+      "required": ["primary_goal", "north_star_kpi_ref"],
+      "properties": {
+        "primary_goal": { "type": "string" },
+        "primary_goal_en": { "type": "string", "description": "English translation of primary_goal; follows the same '<Job title>: <mission>' shape when applicable. Used by the UI when locale=en." },
+        "north_star_kpi_ref": { "type": "string" }
+      }
+    },
+    "kpis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "metric", "target_operator", "target_value", "unit", "frequency"],
+        "properties": {
+          "id": { "type": "string" },
+          "metric": { "type": "string" },
+          "target_operator": { "type": "string", "enum": [">=", "<=", ">", "<", "=="] },
+          "target_value": { "type": "number" },
+          "unit": { "type": "string" },
+          "frequency": { "type": "string", "enum": ["real_time", "hourly", "daily", "weekly", "monthly", "quarterly", "on_demand"], "description": "on_demand: kiểm tra theo sự kiện (event-driven), không theo chu kỳ cố định — ví dụ ops-agent dùng cho kiểm tra hệ thống." }
+        }
+      }
+    },
+    "io_contract": {
+      "type": "object",
+      "required": ["accepts_event_topics", "emits_event_topics"],
+      "properties": {
+        "accepts_event_topics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Mỗi topic PHẢI có trong config/taxonomy/event-topics.yaml — không tự đặt tên mới."
+        },
+        "emits_event_topics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Mỗi topic PHẢI có trong config/taxonomy/event-topics.yaml — không tự đặt tên mới."
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "scope", "write_access"],
+        "properties": {
+          "name": { "type": "string" },
+          "scope": { "type": "string" },
+          "write_access": { "type": "boolean" }
+        }
+      }
+    },
+    "planned_integrations": {
+      "type": "array",
+      "description": "Tích hợp bên ngoài (CRM, helpdesk, đường ống CI…) mà vai trò này SẼ cần nhưng hệ thống CHƯA có — KHÔNG phải công cụ dùng được. Khi tích hợp xong thì chuyển sang `tools`.",
+      "items": {
+        "type": "object",
+        "required": ["name", "scope", "write_access"],
+        "properties": {
+          "name": { "type": "string" },
+          "scope": { "type": "string" },
+          "write_access": { "type": "boolean" },
+          "status": { "type": "string" }
+        }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["auto_approve_max_vnd", "requires_human_approval_above_vnd", "forbidden_actions"],
+      "properties": {
+        "auto_approve_max_vnd": { "type": "number", "minimum": 0 },
+        "requires_human_approval_above_vnd": { "type": "number", "minimum": 0 },
+        "forbidden_actions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "escalation_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["condition", "action", "target_agent_or_human", "max_response_time_seconds"],
+        "properties": {
+          "condition": { "type": "string" },
+          "action": { "type": "string" },
+          "target_agent_or_human": { "type": "string" },
+          "max_response_time_seconds": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "sandbox_mode": {
+      "type": "string",
+      "enum": ["all", "non_main", "off"],
+      "description": "[BỔ SUNG 28/08 — D7] Mặc định 'non_main' cho agent mới tạo, chỉ nâng lên 'off' sau khi qua Shadow Mode."
+    },
+    "risk_tier_default": {
+      "type": "string",
+      "enum": ["T0", "T1", "T2", "T3"],
+      "description": "risk_tier mặc định áp cho hành động của agent này khi không có quy tắc cụ thể hơn — xem G.3.2.3 bảng quy đổi. Đây là trường DUY NHẤT biểu diễn mức khẩn cấp/rủi ro."
+    },
+    "reviewer_model_diversity_required": {
+      "type": "boolean",
+      "description": "[Phụ lục V02] Bắt buộc true nếu agent này thường xuyên đóng vai A (Accountable) cho task risk_tier T2/T3 — reviewer phải chạy model khác agent thực thi."
+    },
+    "reviewer_diversity_exceptions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "[T0-03 lỗi #6] Danh sách decision_type ngoại lệ — cho phép review cùng model khi khẩn cấp (vd critical_incident_emergency)."
+    },
+    "_note": {
+      "type": "string",
+      "description": "Ghi chú tự do cho người đọc — không được Agent dùng để suy luận logic, chỉ mang tính tài liệu."
+    },
+    "job_title": {"type": "string", "description": "Chức danh hiển thị trên sơ đồ (tiếng Việt); bỏ trống thì suy từ tiền tố «Chức danh: …» của objective.primary_goal."},
+    "job_title_en": {"type": "string", "description": "Chức danh tiếng Anh."},
+    "knowledge_baseline": {
+      "type": ["object", "null"],
+      "description": "[BỔ SUNG — D0.5] Gói kiến thức nền được nạp sẵn cho agent thuộc core_clusters TRƯỚC khi công ty thêm quy tắc riêng theo ngành. Bắt buộc có với cluster compliance/audit/training; tuỳ chọn với các cluster khác.",
+      "properties": {
+        "domain": { "type": "string" },
+        "source_pack_id": { "type": "string" },
+        "loaded_at": { "type": "string", "format": "date-time" },
+        "company_specific_overrides_pending": { "type": "boolean" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

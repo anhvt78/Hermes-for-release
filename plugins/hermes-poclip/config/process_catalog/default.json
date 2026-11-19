@@ -1,0 +1,52 @@
+{
+ "version": 1,
+ "_comment": "Sáu quy trình dựng sẵn dùng cho mọi công ty (đọc từ Kanban, sơ đồ tổ chức, phiếu duyệt, họp). Tên và mô tả sửa được bằng cấu hình riêng của công ty.",
+ "processes": [
+  {
+   "id": "work",
+   "kind": "builtin",
+   "builtin": "work",
+   "title": "Xử lý công việc",
+   "purpose": "Việc chảy qua các phòng ban và từng nhân viên: khối phòng chứa người, đường nối là chỗ việc đã chuyển thật. Tuyển dụng, giám sát, duyệt chi, họp có luồng riêng.",
+   "view": "network",
+   "network": {
+    "min_edge": 5
+   }
+  },
+  {
+   "id": "escalation",
+   "kind": "builtin",
+   "builtin": "escalation",
+   "title": "Báo cáo và leo thang",
+   "purpose": "Việc kẹt hoặc cần quyết định đi lên theo chuỗi báo cáo: nhân viên → trưởng phòng → CEO → Chủ tịch."
+  },
+  {
+   "id": "hiring",
+   "kind": "builtin",
+   "builtin": "hiring",
+   "title": "Tuyển dụng nhân viên",
+   "purpose": "Đề xuất vị trí → duyệt → tạo hồ sơ → chạy thử có kiểm chứng → vào làm chính thức."
+  },
+  {
+   "id": "incident",
+   "kind": "builtin",
+   "builtin": "incident",
+   "title": "Giám sát và sự cố",
+   "purpose": "Phát hiện → báo cáo → xử lý → đóng. Mọi sự cố mở đều hiện ở đây."
+  },
+  {
+   "id": "approval",
+   "kind": "builtin",
+   "builtin": "approval",
+   "title": "Duyệt chi và rủi ro",
+   "purpose": "Phiếu xin duyệt (chi tiền, việc rủi ro) → kiểm tra tuân thủ → Chủ tịch quyết định."
+  },
+  {
+   "id": "meeting",
+   "kind": "builtin",
+   "builtin": "meeting",
+   "title": "Họp và quyết định",
+   "purpose": "Chuẩn bị → họp → kết luận → việc sau họp được giao và theo dõi."
+  }
+ ]
+}

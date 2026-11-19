@@ -1,0 +1,4 @@
+# Heartbeat settings — TD-03 D1 Org Chart
+# Used by mark_stale_if_idle() to determine when a 'thức' agent becomes 'stale'.
+
+stale_after_minutes: 30   # Agent không ping > 30 phút → set 'stale'

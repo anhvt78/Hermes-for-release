@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policy Config — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .tabs { display: flex; gap: 0; background: #fff; border-bottom: 2px solid #e2e8f0; padding: 0 2rem; }
+    .tab-btn { padding: 0.75rem 1.5rem; border: none; background: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tab-btn.active { color: #0f3460; border-bottom-color: #0f3460; }
+    .tab-btn:hover:not(.active) { color: #334155; }
+    .tab-content { display: none; padding: 1.5rem 2rem; }
+    .tab-content.active { display: block; }
+    .pc-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; margin-bottom: 1.5rem; }
+    .pc-table th { background: #f1f5f9; font-weight: 600; text-align: left; padding: 0.6rem 0.75rem; border-bottom: 2px solid #e2e8f0; color: #475569; }
+    .pc-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+    .pc-table tr:hover td { background: #f8fafc; }
+    .pc-form { background: #fff; border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); max-width: 680px; }
+    .pc-form h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: #0f172a; }
+    .form-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .form-row label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; font-weight: 600; color: #475569; flex: 1; min-width: 140px; }
+    .form-row input, .form-row select { padding: 0.4rem 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.875rem; }
+    .form-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+    .badge-allow { background: #dcfce7; color: #166534; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .badge-deny  { background: #fee2e2; color: #991b1b; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .badge-off   { background: #f1f5f9; color: #64748b; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .badge-active { background: #dcfce7; color: #166534; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.72rem; }
+    .badge-inactive { background: #f1f5f9; color: #94a3b8; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.72rem; }
+    .audit-section { margin-top: 2rem; }
+    .audit-section h2 { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; border-top: 2px solid #e2e8f0; padding-top: 1rem; }
+    .pending-notice { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.75rem; font-size: 0.875rem; color: #92400e; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .section-header h2 { font-size: 1rem; font-weight: 700; color: #0f172a; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>hermes-poclip</span>
+  <h1>Policy Config (TC-08)</h1>
+  <a href="/approval-queue" style="color:#a5b4fc;font-size:0.85rem;text-decoration:none;">→ Approval Queue</a>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('tool-policy')">Tool Policy</button>
+  <button class="tab-btn" onclick="switchTab('a2a-grants')">A2A Grants</button>
+  <button class="tab-btn" onclick="switchTab('sandbox')">Sandbox</button>
+  <button class="tab-btn" onclick="switchTab('channel-bindings')">Channel Bindings</button>
+</div>
+
+<!-- Tab 1: Tool Policy -->
+<div id="tab-tool-policy" class="tab-content active">
+  <div class="section-header">
+    <h2>Tool Policy Rules</h2>
+    <button class="btn btn-approve" onclick="loadToolPolicies()">↻ Refresh</button>
+  </div>
+
+  <div style="margin-bottom:1rem;display:flex;gap:.75rem;align-items:center;">
+    <label style="font-size:.85rem;font-weight:600;color:#475569;">Profile ID:
+      <input id="tpProfileFilter" type="text" placeholder="Lọc theo profile_id" style="padding:.35rem .6rem;border:1px solid #cbd5e1;border-radius:6px;font-size:.875rem;margin-left:.5rem;">
+    </label>
+    <button class="toolbar" style="padding:.35rem .75rem;" onclick="loadToolPolicies()">Lọc</button>
+  </div>
+
+  <table class="pc-table" id="tpTable">
+    <thead><tr><th>ID</th><th>profile_id</th><th>tool_pattern</th><th>action</th><th>scope</th><th>priority</th><th>revision</th><th>active</th><th>Hành động</th></tr></thead>
+    <tbody id="tpBody"><tr><td colspan="9" class="loading">Đang tải…</td></tr></tbody>
+  </table>
+
+  <div class="pc-form">
+    <h3>Thêm Rule mới</h3>
+    <div class="form-row">
+      <label>profile_id *<input id="tpProfileId" placeholder="* hoặc agent_id" required></label>
+      <label>tool_pattern *<input id="tpPattern" placeholder="bash hoặc group:terminal hoặc *" required></label>
+    </div>
+    <div class="form-row">
+      <label>policy_action *
+        <select id="tpAction"><option value="allow">allow</option><option value="deny">deny</option></select>
+      </label>
+      <label>scope
+        <select id="tpScope"><option value="agent">agent</option><option value="provider">provider</option><option value="profile">profile</option><option value="group">group</option></select>
+      </label>
+      <label>layer_priority<input id="tpPriority" type="number" value="100"></label>
+    </div>
+    <div class="form-row">
+      <label>note<input id="tpNote" placeholder="Ghi chú tuỳ chọn"></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-approve" onclick="createToolPolicy()">+ Thêm</button>
+    </div>
+  </div>
+
+  <div class="pc-form" style="margin-top:1rem;">
+    <h3>Preview Policy</h3>
+    <div class="form-row">
+      <label>profile_id *<input id="pvProfileId" placeholder="profile_id cần kiểm tra"></label>
+      <label>tool_name *<input id="pvToolName" placeholder="tên tool cần kiểm tra"></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-compliance" onclick="previewPolicy()">▶ Preview</button>
+    </div>
+    <div id="pvResult" style="margin-top:.75rem;"></div>
+  </div>
+</div>
+
+<!-- Tab 2: A2A Grants -->
+<div id="tab-a2a-grants" class="tab-content">
+  <div class="section-header">
+    <h2>A2A Grants</h2>
+    <button class="btn btn-approve" onclick="loadA2AGrants()">↻ Refresh</button>
+  </div>
+
+  <table class="pc-table" id="a2aTable">
+    <thead><tr><th>ID</th><th>from_profile</th><th>to_profile</th><th>direction</th><th>operations</th><th>active</th><th>Hành động</th></tr></thead>
+    <tbody id="a2aBody"><tr><td colspan="7" class="loading">Đang tải…</td></tr></tbody>
+  </table>
+
+  <div class="pc-form">
+    <h3>Thêm Grant mới</h3>
+    <div class="form-row">
+      <label>from_profile *<input id="a2aFrom" placeholder="profile nguồn" required></label>
+      <label>to_profile *<input id="a2aTo" placeholder="profile đích" required></label>
+    </div>
+    <div class="form-row">
+      <label>direction
+        <select id="a2aDir"><option value="unidirectional">unidirectional</option><option value="bidirectional">bidirectional</option></select>
+      </label>
+      <label>note<input id="a2aNote" placeholder="Ghi chú"></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-approve" onclick="createA2AGrant()">+ Tạo Grant</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tab 3: Sandbox -->
+<div id="tab-sandbox" class="tab-content">
+  <div class="section-header">
+    <h2>Sandbox Config</h2>
+  </div>
+
+  <div style="margin-bottom:1rem;display:flex;gap:.75rem;align-items:center;">
+    <label style="font-size:.85rem;font-weight:600;color:#475569;">Profile ID:
+      <input id="sbProfileId" type="text" placeholder="profile_id" style="padding:.35rem .6rem;border:1px solid #cbd5e1;border-radius:6px;font-size:.875rem;margin-left:.5rem;">
+    </label>
+    <button class="btn btn-approve" onclick="loadSandbox()">Xem</button>
+  </div>
+
+  <div id="sbResult" style="margin-bottom:1rem;"></div>
+
+  <div class="pc-form">
+    <h3>Cập nhật Sandbox</h3>
+    <div class="form-row">
+      <label>profile_id *<input id="sbUpdateProfile" placeholder="profile_id cần cập nhật"></label>
+      <label>sandbox_mode
+        <select id="sbMode"><option value="">-- không đổi --</option><option value="off">off</option><option value="non-main">non-main</option><option value="all">all</option></select>
+      </label>
+    </div>
+    <div class="form-row">
+      <label>backend<input id="sbBackend" placeholder="local / docker / ssh"></label>
+      <label>workspace_access
+        <select id="sbWorkspace"><option value="">-- không đổi --</option><option value="none">none</option><option value="ro">ro</option><option value="rw">rw</option></select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-changes" onclick="updateSandbox()">Cập nhật</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tab 4: Channel Bindings -->
+<div id="tab-channel-bindings" class="tab-content">
+  <div class="section-header">
+    <h2>Channel Bindings</h2>
+    <button class="btn btn-approve" onclick="loadChannelBindings()">↻ Refresh</button>
+  </div>
+
+  <table class="pc-table" id="cbTable">
+    <thead><tr><th>ID</th><th>channel</th><th>profile_id</th><th>role</th><th>active</th><th>Hành động</th></tr></thead>
+    <tbody id="cbBody"><tr><td colspan="6" class="loading">Đang tải…</td></tr></tbody>
+  </table>
+
+  <div class="pc-form">
+    <h3>Thêm Channel Binding</h3>
+    <div class="form-row">
+      <label>channel *
+        <select id="cbChannel">
+          <option value="telegram">telegram</option>
+          <option value="discord">discord</option>
+          <option value="slack">slack</option>
+          <option value="whatsapp">whatsapp</option>
+          <option value="email">email</option>
+          <option value="web">web</option>
+          <option value="line">line</option>
+          <option value="zalo">zalo</option>
+          <option value="teams">teams</option>
+          <option value="api">api</option>
+          <option value="webhook">webhook</option>
+          <option value="console">console</option>
+        </select>
+      </label>
+      <label>profile_id *<input id="cbProfileId" placeholder="profile_id" required></label>
+    </div>
+    <div class="form-row">
+      <label>role<input id="cbRole" placeholder="admin / viewer / ..."></label>
+      <label>note<input id="cbNote" placeholder="Ghi chú"></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-approve" onclick="createChannelBinding()">+ Thêm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audit Log (chung) -->
+<div style="padding:0 2rem 2rem;">
+  <div class="audit-section">
+    <h2>Audit Log</h2>
+    <div style="display:flex;gap:.75rem;align-items:center;margin-bottom:1rem;">
+      <label style="font-size:.85rem;font-weight:600;color:#475569;">Loại policy:
+        <select id="auditTypeFilter" style="padding:.35rem .6rem;border:1px solid #cbd5e1;border-radius:6px;font-size:.875rem;margin-left:.5rem;">
+          <option value="">Tất cả</option>
+          <option value="tool_policy">tool_policy</option>
+          <option value="a2a_grant">a2a_grant</option>
+          <option value="sandbox">sandbox</option>
+          <option value="channel_binding">channel_binding</option>
+        </select>
+      </label>
+      <button class="btn btn-approve" onclick="loadAuditLog()">↻ Tải</button>
+    </div>
+    <table class="pc-table" id="auditTable">
+      <thead><tr><th>Thời gian</th><th>Loại</th><th>policy_id</th><th>action</th><th>changed_by</th><th>revision</th><th>cần duyệt</th></tr></thead>
+      <tbody id="auditBody"><tr><td colspan="7" class="loading">Chưa tải…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/policy_config.js"></script>
+</body>
+</html>

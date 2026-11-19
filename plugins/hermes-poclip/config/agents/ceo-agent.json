@@ -1,0 +1,145 @@
+{
+  "agent_id": "ceo-agent",
+  "job_title": "Giám đốc điều hành (CEO)",
+  "job_title_en": "Chief Executive Officer (CEO)",
+  "version": "1.2.0",
+  "role_type": "orchestrator",
+  "reports_to": "chairman_human",
+  "cluster": "executive",
+  "status": "active",
+  "lifecycle_stage": "independent_operation",
+  "benchmark_record": null,
+  "shadow_mode_record": null,
+  "objective": {
+    "primary_goal": "Nhận Goal + Budget + Guardrails từ Chủ tịch; phân rã kế hoạch tuần/tháng; điều phối Lead Agent từ clusters.yaml (core + variable); tổng hợp báo cáo 3 tầng; đề xuất chẩn đoán cơ cấu tổ chức mỗi quý",
+    "primary_goal_en": "Receive Goals, Budget, and Guardrails from the Chairman; decompose weekly/monthly plans; coordinate Lead Agents from clusters.yaml (core + variable); synthesise 3-tier reports; propose quarterly org structure diagnostics",
+    "north_star_kpi_ref": "kpi_task_ontime_rate"
+  },
+  "kpis": [
+    {
+      "id": "kpi_uptime",
+      "metric": "system_uptime_pct",
+      "target_operator": ">=",
+      "target_value": 99.9,
+      "unit": "percent",
+      "frequency": "real_time"
+    },
+    {
+      "id": "kpi_task_ontime_rate",
+      "metric": "task_ontime_completion_pct",
+      "target_operator": ">=",
+      "target_value": 90,
+      "unit": "percent",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_chairman_time_spent",
+      "metric": "chairman_daily_minutes",
+      "target_operator": "<=",
+      "target_value": 3,
+      "unit": "minutes",
+      "frequency": "daily"
+    },
+    {
+      "id": "kpi_delegated_decision_time",
+      "metric": "delegated_decision_response_minutes",
+      "target_operator": "<=",
+      "target_value": 60,
+      "unit": "minutes",
+      "frequency": "weekly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "budget.soft_limit_reached",
+      "budget.hard_limit_breached",
+      "incident.critical",
+      "compliance.veto",
+      "agent.benchmark_passed",
+      "agent.shadow_mode_cleared",
+      "audit.anomaly_critical"
+    ],
+    "emits_event_topics": [
+      "org.structural_pattern_detected"
+    ]
+  },
+  "tools": [
+    {
+      "name": "terminal",
+      "scope": "đọc số liệu vận hành bằng lệnh (hệ thống chưa có kho báo cáo tài chính; không bị giới hạn chỉ-đọc)",
+      "write_access": true
+    },
+    {
+      "name": "kanban_create",
+      "scope": "giao việc cho trưởng phòng bằng thẻ Kanban",
+      "write_access": true
+    },
+    {
+      "name": "kanban_comment",
+      "scope": "trao đổi trên thẻ Kanban",
+      "write_access": true
+    },
+    {
+      "name": "poclip_decide_delegated",
+      "scope": "write:quyết phiếu Chủ tịch đã ủy quyền cho CEO (kiểm tra lại ủy quyền; không quyết phiếu của chính mình, không T3, T2 cần Tuân thủ đồng ý)",
+      "write_access": true
+    },
+    {
+      "name": "poclip_emit_event",
+      "scope": "write:gửi chẩn đoán cơ cấu quý (org.structural_pattern_detected) cho Chủ tịch",
+      "write_access": true
+    },
+    {
+      "name": "poclip_report_concern",
+      "scope": "write:tố giác ẩn danh",
+      "write_access": true
+    },
+    {
+      "name": "poclip_escalate_incident",
+      "scope": "write:thông báo một sự cố cho đúng người liên quan (trưởng phòng/CEO/Tuân thủ/Kiểm toán theo ma trận thẩm quyền) kèm gói thông tin 7 mục + báo Chủ tịch một lần; không thay người quyết nghiệp vụ",
+      "write_access": true
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 5000000,
+    "requires_human_approval_above_vnd": 50000000,
+    "forbidden_actions": [
+      "modify_constitution.yaml",
+      "add_or_remove_lead_agent_without_chairman_approval",
+      "approve_spending_above_hard_limit",
+      "deploy_to_production_without_hitl",
+      "self_approve_own_risk_tier_t2_or_t3_proposal"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "cost_exceeds_hard_limit",
+      "action": "trigger_circuit_breaker_and_notify",
+      "target_agent_or_human": "chairman_human",
+      "max_response_time_seconds": 1
+    },
+    {
+      "condition": "business_decision_conflicts_with_core_values",
+      "action": "refuse_and_report",
+      "target_agent_or_human": "chairman_human",
+      "max_response_time_seconds": 0
+    }
+  ],
+  "sandbox_mode": "off",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": true,
+  "planned_integrations": [
+    {
+      "name": "internal_rest_api",
+      "scope": "orchestration:all_clusters",
+      "write_access": true,
+      "status": "chưa tích hợp"
+    },
+    {
+      "name": "systemd_gateway",
+      "scope": "read_only:infra_health",
+      "write_access": false,
+      "status": "chưa tích hợp"
+    }
+  ]
+}

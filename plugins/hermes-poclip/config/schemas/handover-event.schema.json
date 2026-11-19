@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hermes-poclip.internal/schemas/handover-event.schema.json",
+  "title": "Hermes+ Event Bus Handover Event",
+  "description": "Mọi message qua Event Bus (bảng a2a_events, G.3.3.3) phải conform schema này. Tham chiếu G.3.1 Handover Protocol v1.2.",
+  "type": "object",
+  "required": [
+    "event_id", "correlation_id", "topic", "producer_agent_id", "consumer_scope",
+    "risk_tier", "payload", "created_at", "sla_deadline", "status", "retry_count", "max_retries",
+    "idempotency_key", "schema_version"
+  ],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Nối các event thuộc cùng 1 luồng nghiệp vụ (vd. lead.qualified -> order.completed)"
+    },
+    "topic": {
+      "type": "string",
+      "description": "PHẢI có trong config/taxonomy/event-topics.yaml — reject nếu không khớp, KHÔNG tự đoán topic gần đúng"
+    },
+    "producer_agent_id": { "type": "string" },
+    "consumer_scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Danh sách agent_id hoặc cluster nhận; 'chairman_human' hợp lệ cho luồng HitL"
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": ["T0", "T1", "T2", "T3"],
+      "description": "[BỔ SUNG 28/08] Trường DUY NHẤT biểu diễn mức khẩn cấp — KHÔNG kèm thêm trường priority/CRITICAL-HIGH-NORMAL-LOW/🔴🟡🟢 riêng. Hiển thị theo kênh tính từ trường này qua bảng quy đổi G.3.2.3."
+    },
+    "payload": { "type": "object" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "sla_deadline": { "type": "string", "format": "date-time" },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "delivered", "processing", "processed", "failed", "dlq", "expired"],
+      "description": "[SỬA 31/08 — XT-08] Khớp config/taxonomy/task-states.yaml#event_status (7 giá trị theo G.3.3.3). Bỏ 'acked' -> dùng 'processed'; bổ sung 'processing'/'expired'."
+    },
+    "retry_count": { "type": "integer", "minimum": 0 },
+    "max_retries": { "type": "integer", "minimum": 0 },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Bắt buộc — chống xử lý trùng khi Event Bus đảm bảo at-least-once (G.3.3.4)"
+    },
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+$" },
+    "signature": {
+      "type": ["string", "null"],
+      "description": "Chữ ký/hash nội bộ chống giả mạo producer_agent_id — tuỳ triển khai"
+    }
+  },
+  "additionalProperties": false
+}

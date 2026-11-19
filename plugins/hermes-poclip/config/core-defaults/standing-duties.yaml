@@ -1,0 +1,43 @@
+# Nhiệm vụ thường kỳ giao cho nhân viên AI (org/standing_duties.py).
+# Mỗi nhiệm vụ: id, assignee (mã nhân viên), collector (bộ thu thập dữ liệu trong mã), chu kỳ hiện là tuần ISO.
+# Chỉ giao cho nhân viên có DỮ LIỆU THẬT trong hệ thống để làm; nhân viên nghiệp vụ (đầu tư, nghiên cứu, thị trường, tư vấn) chưa có nguồn dữ liệu nên chưa có nhiệm vụ.
+# Chủ tịch bật/tắt chung hoặc từng nhiệm vụ trong trang Chất lượng nhân viên AI.
+duties:
+  - id: audit_weekly_spotcheck
+    assignee: audit-agent
+    every: week
+    collector: audit_spotcheck
+    title_vi: "Kiểm toán: kiểm tra chéo kết quả công việc hàng tuần"
+  - id: compliance_t2_coverage
+    assignee: compliance-agent
+    every: week
+    collector: compliance_t2_coverage
+    title_vi: "Tuân thủ: rà phiếu T2 chưa có kết luận"
+  - id: ops_infra_review
+    assignee: ops-agent
+    every: week
+    collector: ops_infra_review
+    title_vi: "Vận hành: rà soát hạ tầng và việc bị chặn"
+  - id: ceo_weekly_summary
+    assignee: ceo-agent
+    every: week
+    collector: ceo_weekly_summary
+    title_vi: "Điều hành: tóm tắt tuần cho Chủ tịch"
+  - id: ceo_weekly_plan
+    assignee: ceo-agent
+    every: week
+    tail: plan
+    collector: ceo_weekly_plan
+    title_vi: "Điều hành: kế hoạch tuần và giao việc cho trưởng phòng"
+  - id: ceo_monthly_plan
+    assignee: ceo-agent
+    every: month
+    tail: plan
+    collector: ceo_monthly_plan
+    title_vi: "Điều hành: kế hoạch tháng và mục tiêu tháng tới"
+  - id: ceo_quarterly_diagnosis
+    assignee: ceo-agent
+    every: quarter
+    tail: plan
+    collector: ceo_quarterly_diagnosis
+    title_vi: "Điều hành: chẩn đoán cơ cấu tổ chức mỗi quý"

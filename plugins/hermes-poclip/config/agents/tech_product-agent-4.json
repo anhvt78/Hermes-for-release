@@ -1,0 +1,102 @@
+{
+  "agent_id": "tech_product-agent-4",
+  "version": "1.0.0",
+  "role_type": "worker",
+  "reports_to": "tech_product-lead-agent",
+  "cluster": "tech_product",
+  "status": "sandbox",
+  "lifecycle_stage": "design",
+  "objective": {
+    "primary_goal": "Kỹ sư Backend: xây dựng và bảo trì dịch vụ backend đạt SLA về độ trễ và độ ổn định",
+    "primary_goal_en": "Backend Engineer: build and maintain backend services meeting SLA targets for latency and stability",
+    "north_star_kpi_ref": "kpi_api_latency"
+  },
+  "kpis": [
+    {
+      "id": "kpi_api_latency",
+      "metric": "api_p95_latency_ms",
+      "target_operator": "<=",
+      "target_value": 300,
+      "unit": "milliseconds",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_deploy_success",
+      "metric": "deploy_success_rate_pct",
+      "target_operator": ">=",
+      "target_value": 98,
+      "unit": "percent",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_review_turnaround",
+      "metric": "code_review_turnaround_hours",
+      "target_operator": "<=",
+      "target_value": 8,
+      "unit": "hours",
+      "frequency": "weekly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "product.release_deployed",
+      "incident.critical"
+    ],
+    "emits_event_topics": [
+      "product.release_deployed",
+      "incident.system_bug"
+    ]
+  },
+  "tools": [
+    {
+      "name": "terminal",
+      "scope": "write:feature_branches — thay cho công cụ chưa có thật «code_repository» | read_only:service_metrics — thay cho công cụ chưa có thật «database_query»",
+      "write_access": true
+    },
+    {
+      "name": "read_file",
+      "scope": "write:feature_branches — thay cho công cụ chưa có thật «code_repository»",
+      "write_access": false
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 500000,
+    "requires_human_approval_above_vnd": 5000000,
+    "forbidden_actions": [
+      "push_directly_to_protected_branch_without_review",
+      "deploy_to_production_without_approval"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "cannot_meet_sla_or_design_constraint",
+      "action": "request_lead_decision_with_tradeoffs",
+      "target_agent_or_human": "tech_product-lead-agent",
+      "max_response_time_seconds": 1800
+    },
+    {
+      "condition": "change_requires_schema_or_data_migration",
+      "action": "request_lead_and_human_approval",
+      "target_agent_or_human": "chu_tich",
+      "max_response_time_seconds": 3600
+    },
+    {
+      "condition": "production_incident_or_data_loss_detected",
+      "action": "stop_and_escalate_immediately",
+      "target_agent_or_human": "chu_tich",
+      "max_response_time_seconds": 300
+    }
+  ],
+  "sandbox_mode": "non_main",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "_note": "Bổ sung 15/09/2026: vị trí này do Genesis tạo ở bước D0.5 nhưng trước đây CHƯA có thẻ vai trò, nên màn Cơ chế vận hành để trống 4 cột (leo thang / hạn mức tự quyết / ngưỡng xin ý kiến / KPI). Thẻ này bổ sung cho đúng vị trí thật, KHÔNG thay đổi 11 thẻ cũ.",
+  "planned_integrations": [
+    {
+      "name": "ci_pipeline_api",
+      "scope": "read_only:build_logs",
+      "write_access": false,
+      "status": "chưa tích hợp"
+    }
+  ]
+}

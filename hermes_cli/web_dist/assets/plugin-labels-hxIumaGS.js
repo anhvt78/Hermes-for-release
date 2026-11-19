@@ -1,0 +1,1 @@
+function e(e,t){let n=e.labels?.[t];return typeof n==`string`&&n.trim()!==``?n:e.label}export{e as t};

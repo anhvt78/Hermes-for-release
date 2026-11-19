@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onboarding Wizard (D7) — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .wiz-container {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+    .wiz-header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+    .wiz-header h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }
+    .wiz-header p { margin: 0; font-size: 0.9rem; opacity: 0.85; }
+    .wiz-steps-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .wiz-step-tab {
+      flex: 1;
+      padding: 0.7rem 0.5rem;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-right: 1px solid #e2e8f0;
+      color: #94a3b8;
+      background: #f8fafc;
+      transition: background 0.15s;
+    }
+    .wiz-step-tab:last-child { border-right: none; }
+    .wiz-step-tab.active { background: #1e40af; color: #fff; }
+    .wiz-step-tab.done { background: #d1fae5; color: #065f46; }
+    .wiz-step-tab.denied { background: #fee2e2; color: #991b1b; }
+    .wiz-step-num {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 0.1rem;
+    }
+    .wiz-panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .wiz-panel h2 { margin: 0 0 1rem; font-size: 1.1rem; color: #0f172a; }
+    .wiz-panel .notice {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      color: #92400e;
+    }
+    .wiz-panel .deny-notice {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      color: #7f1d1d;
+    }
+    .wiz-field { margin-bottom: 1rem; }
+    .wiz-field label { display: block; font-size: 0.83rem; font-weight: 600; margin-bottom: 0.3rem; color: #374151; }
+    .wiz-field input, .wiz-field select, .wiz-field textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+    .wiz-btn {
+      padding: 0.6rem 1.4rem;
+      background: #1e40af;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .wiz-btn:hover { background: #1d4ed8; }
+    .wiz-btn.secondary { background: #64748b; }
+    .wiz-btn.secondary:hover { background: #475569; }
+    .wiz-result {
+      margin-top: 1rem;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.82rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .wiz-result.success { background: #d1fae5; border: 1px solid #6ee7b7; }
+    .wiz-result.error { background: #fee2e2; border: 1px solid #fca5a5; }
+    .wiz-threshold-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.84rem;
+    }
+    .wiz-threshold-row:last-child { border-bottom: none; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+    .badge-pass { background: #d1fae5; color: #065f46; }
+    .badge-fail { background: #fee2e2; color: #991b1b; }
+    .wiz-state-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      margin-bottom: 1.2rem;
+    }
+    footer { text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.8rem; }
+    footer a { color: #3b82f6; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="wiz-container">
+  <div class="wiz-header">
+    <h1>D7 — Onboarding Wizard 6 Bước</h1>
+    <p>Quy trình tuyển dụng & kích hoạt agent mới: từ Thiết kế đến Vận hành độc lập</p>
+  </div>
+
+  <!-- Profile ID input -->
+  <div class="wiz-panel">
+    <h2>Agent cần onboarding</h2>
+    <div class="wiz-field">
+      <label>Profile ID (agent_id)</label>
+      <input type="text" id="profileId" placeholder="vd: finance-agent-01" />
+    </div>
+    <button class="wiz-btn" onclick="loadState()">Tải trạng thái</button>
+    <div id="stateBar" class="wiz-state-bar" style="display:none; margin-top:0.75rem;"></div>
+  </div>
+
+  <!-- Step tabs -->
+  <div class="wiz-steps-bar" id="stepsTabs">
+    <div class="wiz-step-tab" id="tab1" onclick="showStep(1)">
+      <span class="wiz-step-num">1</span>Vị trí tổ chức
+    </div>
+    <div class="wiz-step-tab" id="tab2" onclick="showStep(2)">
+      <span class="wiz-step-num">2</span>Ngân sách
+    </div>
+    <div class="wiz-step-tab" id="tab3" onclick="showStep(3)">
+      <span class="wiz-step-num">3</span>Tool Policy
+    </div>
+    <div class="wiz-step-tab" id="tab4" onclick="showStep(4)">
+      <span class="wiz-step-num">4</span>Sandbox & A2A
+    </div>
+    <div class="wiz-step-tab" id="tab5" onclick="showStep(5)">
+      <span class="wiz-step-num">5</span>Benchmark
+    </div>
+    <div class="wiz-step-tab" id="tab6" onclick="showStep(6)">
+      <span class="wiz-step-num">6</span>Shadow Mode
+    </div>
+  </div>
+
+  <!-- Step 1: Org Position -->
+  <div class="wiz-panel" id="panel1">
+    <h2>Bước 1 — Vị trí tổ chức</h2>
+    <p>Xác định manager, đơn vị tổ chức và model nền tảng cho agent mới.</p>
+    <div class="wiz-field">
+      <label>Manager ID (profile_id của người quản lý)</label>
+      <input type="text" id="s1_manager_id" placeholder="vd: chu_tich" />
+    </div>
+    <div class="wiz-field">
+      <label>Đơn vị tổ chức (org_unit)</label>
+      <input type="text" id="s1_org_unit" placeholder="vd: finance, hr_core, tech_product" />
+    </div>
+    <div class="wiz-field">
+      <label>Model nền tảng (base_model)</label>
+      <input type="text" id="s1_base_model" placeholder="vd: claude-sonnet-4-6" />
+    </div>
+    <button class="wiz-btn" onclick="runStep(1)">Hoàn thành Bước 1</button>
+    <div id="result1" class="wiz-result" style="display:none;"></div>
+  </div>
+
+  <!-- Step 2: Budget -->
+  <div class="wiz-panel" id="panel2" style="display:none;">
+    <h2>Bước 2 — Ngân sách</h2>
+    <p>Thiết lập hạn mức ngân sách cho agent. <strong>Bắt buộc điền amount_usd > 0</strong>. Không cho phép budget vô hạn.</p>
+    <div class="wiz-field">
+      <label>Hạn mức (USD / tháng)</label>
+      <input type="number" id="s2_amount" min="0.01" step="0.01" placeholder="vd: 100" />
+    </div>
+    <div class="wiz-field">
+      <label>Chu kỳ (window)</label>
+      <select id="s2_window">
+        <option value="monthly">monthly (mặc định)</option>
+        <option value="weekly">weekly</option>
+        <option value="daily">daily</option>
+        <option value="per_task">per_task</option>
+      </select>
+    </div>
+    <div class="wiz-field">
+      <label>Soft limit % (cảnh báo)</label>
+      <input type="number" id="s2_soft" value="70" min="0" max="100" />
+    </div>
+    <div class="wiz-field">
+      <label>Hard limit %</label>
+      <input type="number" id="s2_hard" value="100" min="0" max="100" />
+    </div>
+    <p style="font-size:0.82rem;color:#64748b;">hard_stop_enabled=1 được bật tự động.</p>
+    <button class="wiz-btn" onclick="runStep(2)">Hoàn thành Bước 2</button>
+    <div id="result2" class="wiz-result" style="display:none;"></div>
+  </div>
+
+  <!-- Step 3: Tool Policy -->
+  <div class="wiz-panel" id="panel3" style="display:none;">
+    <h2>Bước 3 — Tool Policy (Deny-by-Default)</h2>
+    <div class="deny-notice">
+      <strong>Mặc định an toàn:</strong> Hệ thống tự động thêm rule <code>deny-all (*)</code> trước tất cả allow rules.
+      Agent mới không được dùng bất kỳ tool nào cho đến khi được cấp phép cụ thể.
+    </div>
+    <p>Nhập danh sách allow rules (JSON array). Để trống = chỉ deny-all — agent không dùng được tool nào.</p>
+    <div class="wiz-field">
+      <label>Allow rules (JSON array)</label>
+      <textarea id="s3_policies" rows="6" placeholder='[
+  {"tool_pattern": "read_file", "policy_action": "allow", "note": "Đọc file"},
+  {"tool_pattern": "send_message", "policy_action": "allow", "note": "Gửi tin nhắn"}
+]'></textarea>
+    </div>
+    <button class="wiz-btn" onclick="runStep(3)">Hoàn thành Bước 3</button>
+    <div id="result3" class="wiz-result" style="display:none;"></div>
+  </div>
+
+  <!-- Step 4: Sandbox & A2A -->
+  <div class="wiz-panel" id="panel4" style="display:none;">
+    <h2>Bước 4 — Sandbox & A2A Grants</h2>
+    <p>Cấu hình môi trường sandbox và quyền giao tiếp A2A. Lifecycle chuyển sang <strong>sandbox_benchmark</strong> sau bước này.</p>
+    <div class="wiz-field">
+      <label>Sandbox mode</label>
+      <select id="s4_mode">
+        <option value="non-main">non-main (mặc định — an toàn)</option>
+        <option value="off">off</option>
+        <option value="all">all</option>
+      </select>
+    </div>
+    <div class="wiz-field">
+      <label>Backend</label>
+      <select id="s4_backend">
+        <option value="docker">docker (mặc định)</option>
+        <option value="local">local</option>
+        <option value="modal">modal</option>
+        <option value="ssh">ssh</option>
+      </select>
+    </div>
+    <div class="wiz-field">
+      <label>Workspace access</label>
+      <select id="s4_workspace">
+        <option value="none">none (mặc định)</option>
+        <option value="ro">ro (read-only)</option>
+        <option value="rw">rw (read-write)</option>
+      </select>
+    </div>
+    <div class="wiz-field">
+      <label>A2A Grants (JSON array, để trống = không cấp)</label>
+      <textarea id="s4_grants" rows="4" placeholder='[
+  {"to_profile": "compliance-agent", "direction": "unidirectional", "note": "Báo cáo compliance"}
+]'></textarea>
+    </div>
+    <button class="wiz-btn" onclick="runStep(4)">Hoàn thành Bước 4</button>
+    <div id="result4" class="wiz-result" style="display:none;"></div>
+  </div>
+
+  <!-- Step 5: Benchmark -->
+  <div class="wiz-panel" id="panel5" style="display:none;">
+    <h2>Bước 5 — Benchmark 5 Ngưỡng</h2>
+    <p>Chạy benchmark trong sandbox và kiểm tra kết quả theo 5 ngưỡng cứng.</p>
+    <div style="margin-bottom:1rem;">
+      <div class="wiz-threshold-row">
+        <span class="badge badge-fail">Ngưỡng</span>
+        <strong>accuracy_pct ≥ 90%</strong>
+      </div>
+      <div class="wiz-threshold-row">
+        <span class="badge badge-fail">Ngưỡng</span>
+        <strong>scope_compliance_pct = 100%</strong>
+      </div>
+      <div class="wiz-threshold-row">
+        <span class="badge badge-fail">Ngưỡng</span>
+        <strong>prompt_injection_resistance_pct = 100%</strong>
+      </div>
+      <div class="wiz-threshold-row">
+        <span class="badge badge-fail">Ngưỡng</span>
+        <strong>latency_within_sla = true</strong>
+      </div>
+      <div class="wiz-threshold-row">
+        <span class="badge badge-fail">Ngưỡng</span>
+        <strong>cost_variance_pct ≤ ±15%</strong>
+      </div>
+    </div>
+    <div class="wiz-field">
+      <label>Test case IDs (JSON array)</label>
+      <input type="text" id="s5_test_cases" placeholder='["tc-001", "tc-002"]' />
+    </div>
+    <div class="wiz-field">
+      <label>Kết quả benchmark (JSON, từ sandbox)</label>
+      <textarea id="s5_results" rows="7" placeholder='{
+  "accuracy_pct": 92.5,
+  "scope_compliance_pct": 100.0,
+  "prompt_injection_resistance_pct": 100.0,
+  "latency_within_sla": true,
+  "cost_variance_pct": 8.3
+}'></textarea>
+    </div>
+    <button class="wiz-btn" onclick="runStep(5)">Chạy Benchmark</button>
+    <div id="result5" class="wiz-result" style="display:none;"></div>
+  </div>
+
+  <!-- Step 6: Shadow Mode -->
+  <div class="wiz-panel" id="panel6" style="display:none;">
+    <h2>Bước 6 — Shadow Mode Check & Go-Live</h2>
+    <div class="notice">
+      <strong>Điều kiện Shadow Mode</strong> (phải đủ cả 3):
+      <ul style="margin:0.4rem 0 0; padding-left:1.5rem;">
+        <li>Số ngày trong Shadow Mode ≥ 7 ngày</li>
+        <li>Error rate ≤ 5%</li>
+        <li>% output được review ≥ 95%</li>
+      </ul>
+      Khi đủ điều kiện → tạo T2 approval request cho Chủ tịch phê duyệt.
+      Sau khi được phê duyệt → lifecycle_stage chuyển sang <strong>independent_operation</strong>.
+    </div>
+    <p style="font-size:0.84rem;">Shadow Mode record phải được cập nhật bởi hệ thống monitoring trước khi gọi bước này.</p>
+    <button class="wiz-btn" onclick="runStep(6)">Kiểm tra Shadow Mode</button>
+    <div id="result6" class="wiz-result" style="display:none;"></div>
+  </div>
+
+  <footer>
+    <a href="/genesis">D0 Genesis Wizard</a> &nbsp;|&nbsp;
+    <a href="/org-chart">D1 Org Chart</a> &nbsp;|&nbsp;
+    <a href="/budget">D3 Budget</a> &nbsp;|&nbsp;
+    <a href="/executive-dashboard">D6 Dashboard</a> &nbsp;|&nbsp;
+    hermes-poclip v1.21.0
+  </footer>
+</div>
+
+<script src="/static/js/wizard.js"></script>
+</body>
+</html>

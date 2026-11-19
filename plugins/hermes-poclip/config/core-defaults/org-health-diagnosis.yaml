@@ -1,0 +1,41 @@
+# ============================================================
+# THAM SỐ MẶC ĐỊNH — CHẨN ĐOÁN CƠ CẤU TỔ CHỨC (G.4.5.5)
+# ============================================================
+component: "org-health-diagnosis"
+version: "1.0.0"
+
+parameters:
+  repeated_finding_threshold_count:
+    default: 3
+    min_allowed: 1
+    max_allowed: null
+    description: "Số lần audit_findings cùng loại/cùng cluster trong 1 quý để coi là 'pattern' cần đưa vào chẩn đoán"
+
+  repeated_escalation_threshold_count:
+    default: 2
+    min_allowed: 1
+    max_allowed: null
+    description: "Số lần 2 cluster escalate lẫn nhau trong 1 quý để coi là 'xung đột lặp lại'"
+
+  kpi_underperformance_consecutive_periods:
+    default: 3
+    min_allowed: 2
+    max_allowed: null
+    description: "Số kỳ báo cáo liên tiếp 1 Lead dưới KPI để gắn cờ cần xem xét (retrain hoặc đổi KPI)"
+
+  workload_imbalance_ratio:
+    default: 1.5
+    min_allowed: 1.1
+    max_allowed: null
+    description: "Tỷ lệ lệch tải giữa cluster cao nhất và thấp nhất để coi là mất cân bằng cần đề xuất tách/gộp"
+
+  escalation_rate_increase_alert_pct:
+    default: 20
+    min_allowed: 5
+    max_allowed: null
+    description: "% tăng tỷ lệ escalate T2+T3 so với quý trước để gắn cờ rà lại delegation-matrix.json"
+
+  diagnosis_frequency:
+    default: "quarterly"
+    allowed_values: ["monthly", "quarterly", "semi_annually"]
+    description: "Tần suất chạy thuật toán chẩn đoán — công ty tăng trưởng nhanh/biến động nhiều nên chạy monthly thay vì quarterly"

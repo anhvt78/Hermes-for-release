@@ -1,0 +1,17 @@
+{
+  "release_id": "2026.11.19-8",
+  "version": "0.21.7",
+  "source_commit": "7ed0c48e08773ce84af16a371298494d5e71a27d",
+  "source_branch": "dong-bo-va-hoat-dong",
+  "created_at": "2026-11-19T06:51:26.212729+00:00",
+  "notes": "Chính sách gọn lại: 4 thẻ (Quyền dùng công cụ, Liên lạc giữa nhân viên, Kênh nhắn tin bên ngoài, Mức cách ly); thẻ Kênh nhắn tin hiện kết nối Telegram/Zalo đang chạy thật. Công ty: thêm tab Lịch và nhắc việc (đọc báo cáo hằng ngày/tuần, giờ tạo báo cáo, thời hạn nhắc việc) và tab Phân phối chỉ thị. Ô chọn có tìm kiếm trong ô; một cửa đăng nhập; bỏ thông báo Help improve Hermes.",
+  "build": {
+    "kind": "compiled",
+    "python": "cp311",
+    "platform": "linux-x86_64",
+    "cython": "3.1.4",
+    "source_release": "2026.11.19-8",
+    "default_trial_days": 180,
+    "built_at": "2026-11-19T07:08:18.364958+00:00"
+  }
+}

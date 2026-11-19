@@ -1,0 +1,103 @@
+{
+  "agent_id": "marketing-agent-2",
+  "version": "1.0.0",
+  "role_type": "worker",
+  "reports_to": "marketing-lead-agent",
+  "cluster": "marketing",
+  "status": "sandbox",
+  "lifecycle_stage": "design",
+  "objective": {
+    "primary_goal": "Chuyên viên nội dung và thương hiệu: sản xuất nội dung theo kế hoạch phòng Marketing trong soft limit ngân sách quảng cáo",
+    "primary_goal_en": "Content & Brand Specialist: produce content per the Marketing department plan within the ad budget soft limit",
+    "north_star_kpi_ref": "kpi_content_published"
+  },
+  "kpis": [
+    {
+      "id": "kpi_content_published",
+      "metric": "content_pieces_published_per_week",
+      "target_operator": ">=",
+      "target_value": 5,
+      "unit": "count",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_engagement",
+      "metric": "content_engagement_rate_pct",
+      "target_operator": ">=",
+      "target_value": 3.5,
+      "unit": "percent",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_content_rework",
+      "metric": "content_rework_pct",
+      "target_operator": "<=",
+      "target_value": 15,
+      "unit": "percent",
+      "frequency": "weekly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "lead.qualified",
+      "product.release_deployed",
+      "content.review_requested"
+    ],
+    "emits_event_topics": [
+      "content.review_requested",
+      "lead.nurture_needed"
+    ]
+  },
+  "tools": [
+    {
+      "name": "write_file",
+      "scope": "write:draft_only — thay cho công cụ chưa có thật «content_generation_tool»",
+      "write_access": true
+    },
+    {
+      "name": "terminal",
+      "scope": "read_only:marketing_analytics — thay cho công cụ chưa có thật «database_query»",
+      "write_access": false
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 500000,
+    "requires_human_approval_above_vnd": 5000000,
+    "forbidden_actions": [
+      "publish_content_without_compliance_review_if_flagged",
+      "spend_ad_budget_directly_from_own_account"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "content_claim_requires_legal_or_compliance_check",
+      "action": "hold_publish_and_request_review",
+      "target_agent_or_human": "compliance-agent",
+      "max_response_time_seconds": 3600
+    },
+    {
+      "condition": "campaign_budget_or_scope_beyond_own_authority",
+      "action": "request_lead_approval_before_commit",
+      "target_agent_or_human": "marketing-lead-agent",
+      "max_response_time_seconds": 1800
+    },
+    {
+      "condition": "brand_crisis_or_public_complaint_about_content",
+      "action": "stop_publishing_and_escalate",
+      "target_agent_or_human": "chu_tich",
+      "max_response_time_seconds": 300
+    }
+  ],
+  "sandbox_mode": "non_main",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "_note": "Bổ sung 15/09/2026: vị trí này do Genesis tạo ở bước D0.5 nhưng trước đây CHƯA có thẻ vai trò, nên màn Cơ chế vận hành để trống 4 cột (leo thang / hạn mức tự quyết / ngưỡng xin ý kiến / KPI). Thẻ này bổ sung cho đúng vị trí thật, KHÔNG thay đổi 11 thẻ cũ.",
+  "planned_integrations": [
+    {
+      "name": "ad_platform_api",
+      "scope": "read_only:campaign_metrics",
+      "write_access": false,
+      "status": "chưa tích hợp"
+    }
+  ]
+}

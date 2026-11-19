@@ -1,0 +1,94 @@
+{
+  "agent_id": "marketing-lead-agent",
+  "job_title": "Trưởng phòng Marketing",
+  "job_title_en": "Head of Marketing",
+  "version": "1.0.0",
+  "role_type": "lead",
+  "reports_to": "ceo-agent",
+  "cluster": "marketing",
+  "status": "active",
+  "lifecycle_stage": "independent_operation",
+  "benchmark_record": null,
+  "shadow_mode_record": null,
+  "objective": {
+    "primary_goal": "Tạo/nuôi lead, quản lý nội dung và ngân sách quảng cáo trong soft limit, chuyển lead đủ điều kiện sang Sales",
+    "primary_goal_en": "Generate and nurture leads, manage content and ad budget within soft limit, pass qualified leads to Sales",
+    "north_star_kpi_ref": "kpi_qualified_leads"
+  },
+  "kpis": [
+    {
+      "id": "kpi_qualified_leads",
+      "metric": "leads_qualified_per_week",
+      "target_operator": ">=",
+      "target_value": 0,
+      "unit": "count",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_cpl",
+      "metric": "cost_per_lead_vnd",
+      "target_operator": "<=",
+      "target_value": 0,
+      "unit": "VND",
+      "frequency": "weekly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "customer.tier_upgraded",
+      "product.release_deployed",
+      "compliance.veto"
+    ],
+    "emits_event_topics": [
+      "lead.qualified",
+      "lead.nurture_needed",
+      "content.review_requested",
+      "budget.soft_limit_reached"
+    ]
+  },
+  "tools": [
+    {
+      "name": "write_file",
+      "scope": "write:draft_only — thay cho công cụ chưa có thật «content_generation_tool»",
+      "write_access": true
+    },
+    {
+      "name": "terminal",
+      "scope": "read_only:marketing_analytics — thay cho công cụ chưa có thật «database_query»",
+      "write_access": false
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 5000000,
+    "requires_human_approval_above_vnd": 50000000,
+    "forbidden_actions": [
+      "publish_content_without_compliance_review_if_flagged",
+      "exceed_hard_limit_ad_spend"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "budget_hard_limit_reached",
+      "action": "pause_campaigns_and_notify",
+      "target_agent_or_human": "ceo-agent",
+      "max_response_time_seconds": 1
+    },
+    {
+      "condition": "task_scope_overlap_detected_same_cluster",
+      "action": "reject_and_propose_merge",
+      "target_agent_or_human": "marketing-lead-agent",
+      "max_response_time_seconds": 0
+    }
+  ],
+  "sandbox_mode": "off",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "planned_integrations": [
+    {
+      "name": "ad_platform_api",
+      "scope": "write:campaigns_within_budget",
+      "write_access": true,
+      "status": "chưa tích hợp"
+    }
+  ]
+}
