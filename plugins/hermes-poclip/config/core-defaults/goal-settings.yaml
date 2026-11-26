@@ -1,0 +1,23 @@
+# Goal Tree settings — TD-01 D2
+# Cảnh báo orphan: task_contracts.goal_id IS NULL và status in (in_progress, pending_review)
+
+orphan_warning:
+  # Statuses kích hoạt cảnh báo orphan
+  trigger_statuses:
+    - in_progress
+    - pending_review
+
+  # Ngưỡng màu: < yellow_threshold → vàng, >= yellow_threshold → đỏ
+  yellow_threshold: 3   # <3 orphan → badge vàng
+  red_threshold: 3      # >=3 orphan → badge đỏ
+
+# Độ sâu tối đa khi query cây (absolute max = 10)
+max_depth_default: 4
+max_depth_limit: 10
+
+# Cấp hợp lệ trong cây
+levels:
+  - company
+  - initiative
+  - outcome
+  - task

@@ -1,0 +1,14 @@
+{
+  "name": "hermes-poclip-meeting",
+  "label": "Phòng họp",
+  "labels": {"vi": "Phòng họp", "en": "Meeting Room"},
+  "description": "Convene agent/human meetings, watch sessions run, and manage the action items they produce (Hermes+ Part E) — reuses the /api/plugins/hermes-poclip backend already mounted by the hermes-poclip plugin.",
+  "icon": "MessageSquare",
+  "version": "1.39.0",
+  "tab": {
+    "path": "/meeting-room",
+    "position": "after:skills",
+    "hidden": true
+  },
+  "entry": "dist/index.js"
+}

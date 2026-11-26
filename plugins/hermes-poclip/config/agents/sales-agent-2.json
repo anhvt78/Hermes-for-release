@@ -1,0 +1,102 @@
+{
+  "agent_id": "sales-agent-2",
+  "version": "1.0.0",
+  "role_type": "worker",
+  "reports_to": "sales-lead-agent",
+  "cluster": "sales",
+  "status": "sandbox",
+  "lifecycle_stage": "design",
+  "objective": {
+    "primary_goal": "Chuyên viên giải pháp và định giá: tư vấn giải pháp, lập báo giá trong khung giá đã được duyệt",
+    "primary_goal_en": "Solutions & Pricing Specialist: advise on solutions and prepare quotes within the approved pricing framework",
+    "north_star_kpi_ref": "kpi_deals_won"
+  },
+  "kpis": [
+    {
+      "id": "kpi_deals_won",
+      "metric": "deals_closed_per_month",
+      "target_operator": ">=",
+      "target_value": 8,
+      "unit": "count",
+      "frequency": "monthly"
+    },
+    {
+      "id": "kpi_quote_accuracy",
+      "metric": "quote_accuracy_pct",
+      "target_operator": ">=",
+      "target_value": 95,
+      "unit": "percent",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_pipeline_hygiene",
+      "metric": "pipeline_records_updated_pct",
+      "target_operator": ">=",
+      "target_value": 90,
+      "unit": "percent",
+      "frequency": "weekly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "lead.qualified",
+      "order.completed"
+    ],
+    "emits_event_topics": [
+      "order.completed",
+      "budget.approval_needed"
+    ]
+  },
+  "tools": [
+    {
+      "name": "read_file",
+      "scope": "read_only:approved_price_list — thay cho công cụ chưa có thật «price_book»",
+      "write_access": false
+    },
+    {
+      "name": "terminal",
+      "scope": "read_only:crm — thay cho công cụ chưa có thật «database_query»",
+      "write_access": false
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 500000,
+    "requires_human_approval_above_vnd": 5000000,
+    "forbidden_actions": [
+      "offer_discount_outside_approved_price_book",
+      "commit_legal_terms_or_sla_without_approval"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "quote_or_discount_beyond_approved_price_book",
+      "action": "request_lead_approval_before_sending",
+      "target_agent_or_human": "sales-lead-agent",
+      "max_response_time_seconds": 1800
+    },
+    {
+      "condition": "deal_value_above_own_authority_threshold",
+      "action": "request_ceo_approval",
+      "target_agent_or_human": "ceo-agent",
+      "max_response_time_seconds": 3600
+    },
+    {
+      "condition": "customer_requests_unapproved_legal_terms",
+      "action": "stop_and_escalate",
+      "target_agent_or_human": "chu_tich",
+      "max_response_time_seconds": 900
+    }
+  ],
+  "sandbox_mode": "non_main",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "_note": "Bổ sung 15/09/2026: vị trí này do Genesis tạo ở bước D0.5 nhưng trước đây CHƯA có thẻ vai trò, nên màn Cơ chế vận hành để trống 4 cột (leo thang / hạn mức tự quyết / ngưỡng xin ý kiến / KPI). Thẻ này bổ sung cho đúng vị trí thật, KHÔNG thay đổi 11 thẻ cũ.",
+  "planned_integrations": [
+    {
+      "name": "crm_api",
+      "scope": "write:deals_and_quotes",
+      "write_access": true,
+      "status": "chưa tích hợp"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+# Budget defaults — TD-02 D3
+# Dùng bởi create_budget_policy khi không truyền giá trị tường minh.
+
+soft_limit_pct: 70        # Ngưỡng % gửi cảnh báo (warning)
+hard_limit_pct: 100       # Ngưỡng % pause agent (critical)
+window: monthly           # Chu kỳ mặc định
+
+# Token budget alerts (G.4.2)
+token_budget_warning_pct: 80
+token_budget_critical_pct: 100

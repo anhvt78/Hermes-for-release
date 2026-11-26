@@ -1,0 +1,91 @@
+{
+ "id": "ecommerce_project_10_steps",
+ "title": "Dự án 10 bước (mẫu công ty thương mại điện tử)",
+ "proposal": {
+  "submit_step": "de_xuat_tinh_nang",
+  "review_step": "duyet_de_xuat"
+ },
+ "steps": [
+  {
+   "key": "tiep_nhan",
+   "label": "Tiếp nhận",
+   "sla_hours": 8,
+   "kanban": true,
+   "work_type": "operation"
+  },
+  {
+   "key": "tra_cuu_noi_bo",
+   "label": "Tra cứu nội bộ",
+   "sla_hours": 16,
+   "kanban": true,
+   "work_type": "report"
+  },
+  {
+   "key": "lam_ro_nhu_cau",
+   "label": "Làm rõ nhu cầu",
+   "sla_hours": 48,
+   "waits_for": "customer"
+  },
+  {
+   "key": "de_xuat_tinh_nang",
+   "label": "Đề xuất tính năng",
+   "sla_hours": 40,
+   "kanban": true,
+   "work_type": "analysis",
+   "gate": {
+    "kind": "proposal_approved"
+   }
+  },
+  {
+   "key": "duyet_de_xuat",
+   "label": "Duyệt đề xuất",
+   "sla_hours": 24,
+   "gate": {
+    "kind": "proposal_approved"
+   }
+  },
+  {
+   "key": "thiet_ke_ui_ux",
+   "label": "Thiết kế UI/UX",
+   "sla_hours": 80,
+   "kanban": true,
+   "work_type": "design"
+  },
+  {
+   "key": "nghiem_thu_giao_dien",
+   "label": "Nghiệm thu giao diện",
+   "sla_hours": 72,
+   "waits_for": "customer",
+   "gate": {
+    "kind": "customer_review",
+    "scope": "ui_design",
+    "on_approve": "phat_trien",
+    "on_rework": "thiet_ke_ui_ux"
+   }
+  },
+  {
+   "key": "phat_trien",
+   "label": "Phát triển",
+   "sla_hours": 160,
+   "kanban": true,
+   "work_type": "code"
+  },
+  {
+   "key": "nghiem_thu_san_pham",
+   "label": "Nghiệm thu sản phẩm",
+   "sla_hours": 72,
+   "waits_for": "customer",
+   "gate": {
+    "kind": "customer_review",
+    "scope": "product_acceptance",
+    "on_approve": "hoan_thanh",
+    "on_rework": "phat_trien"
+   }
+  },
+  {
+   "key": "hoan_thanh",
+   "label": "Hoàn thành",
+   "sla_hours": 4
+  }
+ ]
+}

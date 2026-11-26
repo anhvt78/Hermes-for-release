@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genesis Wizard (D0) — hermes-poclip</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .wiz-container {
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1.25rem;
+    }
+    .wiz-header {
+      background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+    .wiz-header h1 { margin: 0 0 0.3rem; font-size: 1.5rem; }
+    .wiz-header p { margin: 0; font-size: 0.9rem; opacity: 0.85; }
+    .wiz-steps-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .wiz-step-tab {
+      flex: 1;
+      padding: 0.7rem 0.5rem;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-right: 1px solid #e2e8f0;
+      color: #94a3b8;
+      background: #f8fafc;
+      transition: background 0.15s;
+    }
+    .wiz-step-tab:last-child { border-right: none; }
+    .wiz-step-tab.active { background: #059669; color: #fff; }
+    .wiz-step-tab.done { background: #d1fae5; color: #065f46; }
+    .wiz-step-num {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 0.15rem;
+    }
+    .wiz-card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.25rem;
+    }
+    .wiz-card h2 { margin: 0 0 1rem; font-size: 1.1rem; color: #1e293b; }
+    .wiz-field { margin-bottom: 1rem; }
+    .wiz-field label { display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem; }
+    .wiz-field input, .wiz-field textarea, .wiz-field select {
+      width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #cbd5e1;
+      border-radius: 8px; font-size: 0.92rem; box-sizing: border-box;
+    }
+    .wiz-field textarea { min-height: 80px; resize: vertical; }
+    .btn-primary {
+      background: #059669; color: #fff; border: none; border-radius: 8px;
+      padding: 0.65rem 1.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-primary:hover { background: #047857; }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .progress-bar-wrap { background: #e2e8f0; border-radius: 99px; height: 8px; margin-bottom: 1.25rem; }
+    .progress-bar-fill { background: #059669; border-radius: 99px; height: 8px; transition: width 0.3s; }
+    .result-box {
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px;
+      padding: 1rem 1.25rem; margin-top: 1rem; font-size: 0.9rem;
+    }
+    .error-box {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px;
+      padding: 1rem 1.25rem; margin-top: 1rem; font-size: 0.9rem; color: #991b1b;
+    }
+    .completed-banner {
+      background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
+      color: #fff; border-radius: 14px; padding: 2rem;
+      text-align: center; margin-bottom: 1.5rem;
+    }
+    .completed-banner h2 { margin: 0 0 0.5rem; font-size: 1.4rem; }
+    .queue-list { list-style: none; padding: 0; margin: 0.5rem 0 0; }
+    .queue-list li {
+      padding: 0.4rem 0.8rem; background: #ecfdf5; border-radius: 6px;
+      margin-bottom: 0.35rem; font-size: 0.88rem; color: #065f46; font-weight: 500;
+    }
+    .nav-links { margin-top: 1.5rem; font-size: 0.85rem; color: #64748b; }
+    .nav-links a { color: #059669; margin-right: 1rem; }
+  </style>
+</head>
+<body>
+<div class="wiz-container">
+  <div class="wiz-header">
+    <h1>🏗️ Genesis Wizard — D0: Thành lập Công ty</h1>
+    <p>Wizard chạy đúng 1 lần để định hình cơ cấu công ty trước khi D1–D8 hoạt động</p>
+  </div>
+
+  <!-- Trạng thái hoàn tất -->
+  <div id="completed-view" style="display:none">
+    <div class="completed-banner">
+      <h2>🎉 Công ty đã được thành lập!</h2>
+      <p>Tất cả 5 bước D0 đã hoàn tất. Hàng đợi D7 sẵn sàng.</p>
+    </div>
+    <div class="wiz-card">
+      <h2>Hàng đợi Onboarding D7</h2>
+      <ul class="queue-list" id="queue-list"></ul>
+    </div>
+  </div>
+
+  <!-- Wizard form -->
+  <div id="wizard-view">
+    <!-- Progress bar -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="wiz-steps-bar">
+      <div class="wiz-step-tab" data-step="D0.1" id="tab-d01">
+        <span class="wiz-step-num">1</span>Phỏng vấn
+      </div>
+      <div class="wiz-step-tab" data-step="D0.2" id="tab-d02">
+        <span class="wiz-step-num">2</span>CEO Agent?
+      </div>
+      <div class="wiz-step-tab" data-step="D0.3" id="tab-d03">
+        <span class="wiz-step-num">3</span>Kiến thức nền
+      </div>
+      <div class="wiz-step-tab" data-step="D0.4" id="tab-d04">
+        <span class="wiz-step-num">4</span>Phân rã
+      </div>
+      <div class="wiz-step-tab" data-step="D0.5" id="tab-d05">
+        <span class="wiz-step-num">5</span>Hàng đợi D7
+      </div>
+    </div>
+
+    <!-- Step panels -->
+
+    <!-- D0.1 -->
+    <div class="wiz-card" id="panel-d01">
+      <h2>Bước 1 — Phỏng vấn cấu trúc (7 câu hỏi)</h2>
+      <div class="wiz-field">
+        <label>Công ty/sản phẩm phục vụ ai, giải quyết vấn đề gì? (Mission)</label>
+        <textarea id="d01-mission" placeholder="VD: Giúp doanh nghiệp SME tự động hoá vận hành qua AI Agent"></textarea>
+      </div>
+      <div class="wiz-field">
+        <label>Ngành nghề của bạn?</label>
+        <input type="text" id="d01-industry" placeholder="VD: saas_b2b, fintech, ecommerce, healthcare...">
+      </div>
+      <div class="wiz-field">
+        <label>Mức độ chấp nhận rủi ro khi để Agent tự quyết (thấp/trung bình/cao)?</label>
+        <select id="d01-risk">
+          <option value="low">Thấp</option>
+          <option value="medium" selected>Trung bình</option>
+          <option value="high">Cao</option>
+        </select>
+      </div>
+      <div class="wiz-field">
+        <label>Mục tiêu định lượng 3 năm (doanh thu, số khách hàng...)?</label>
+        <input type="text" id="d01-vision" placeholder="VD: 500 khách hàng, doanh thu 12 tỷ VND đến 2028">
+      </div>
+      <div class="wiz-field">
+        <label>Ngân sách khởi điểm cho vận hành Agent (VND)?</label>
+        <input type="number" id="d01-budget" placeholder="VD: 50000000">
+      </div>
+      <div class="wiz-field">
+        <label>Muốn tự quản lý Trưởng phòng hay có CEO Agent điều phối thay?</label>
+        <select id="d01-ceo-pref">
+          <option value="auto">Để hệ thống đề xuất (auto)</option>
+          <option value="yes">Muốn có CEO Agent</option>
+          <option value="no">Tự quản lý trực tiếp</option>
+        </select>
+      </div>
+      <div class="wiz-field">
+        <label>Yêu cầu pháp lý/ngành đặc thù cần Compliance Agent biết trước?</label>
+        <textarea id="d01-compliance" placeholder="VD: GDPR cho thị trường EU; hoặc 'Không có'"></textarea>
+      </div>
+      <button class="btn-primary" onclick="runStep('D0.1')">Tiếp theo →</button>
+      <div id="result-d01"></div>
+    </div>
+
+    <!-- D0.2 -->
+    <div class="wiz-card" id="panel-d02" style="display:none">
+      <h2>Bước 2 — Quyết định: Có cần CEO Agent không?</h2>
+      <p id="d02-recommendation" style="color:#059669;font-weight:600;margin-bottom:1rem;"></p>
+      <div class="wiz-field">
+        <label>Số variable clusters dự kiến (phòng ban theo ngành)?</label>
+        <input type="number" id="d02-n-clusters" min="0" value="3">
+      </div>
+      <div class="wiz-field">
+        <label>Quyết định của Chủ tịch:</label>
+        <select id="d02-decision">
+          <option value="1">Có — cần CEO Agent điều phối</option>
+          <option value="0">Không — Chủ tịch quản lý trực tiếp</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="runStep('D0.2')">Tiếp theo →</button>
+      <div id="result-d02"></div>
+    </div>
+
+    <!-- D0.3 -->
+    <div class="wiz-card" id="panel-d03" style="display:none">
+      <h2>Bước 3 — Nạp kiến thức nền cho 3 Agent lõi</h2>
+      <p style="color:#475569;font-size:0.9rem;">
+        Hệ thống sẽ nạp kiến thức nền cho: <strong>Compliance Agent</strong>,
+        <strong>Audit Agent</strong>, <strong>Training Lead Agent</strong>.
+        Yêu cầu pháp lý đặc thù từ Bước 1 sẽ được bổ sung vào Compliance Agent.
+      </p>
+      <div class="wiz-field">
+        <label>Company overrides bổ sung (tuỳ chọn — để trống nếu không có):</label>
+        <textarea id="d03-overrides" placeholder="VD: GDPR: lưu trữ dữ liệu khách hàng EU trong phạm vi EU..."></textarea>
+      </div>
+      <button class="btn-primary" onclick="runStep('D0.3')">Nạp kiến thức nền →</button>
+      <div id="result-d03"></div>
+    </div>
+
+    <!-- D0.4 -->
+    <div class="wiz-card" id="panel-d04" style="display:none">
+      <h2>Bước 4 — Phân rã chiến lược thành cơ cấu</h2>
+      <p style="color:#475569;font-size:0.9rem;">
+        Nhập các phòng ban (variable clusters) theo ngành. Mỗi dòng: <code>cluster_id,priority</code><br>
+        Priority: 0=bắt buộc ngay, 1=tuần đầu, 2=tháng đầu<br>
+        Ví dụ: <code>finance,0</code> | <code>marketing,1</code> | <code>sales,1</code>
+      </p>
+      <div class="wiz-field">
+        <label>Variable clusters (mỗi dòng: id,priority):</label>
+        <textarea id="d04-clusters" rows="6" placeholder="finance,0&#10;marketing,1&#10;sales,1&#10;tech_product,2"></textarea>
+      </div>
+      <button class="btn-primary" onclick="runStep('D0.4')">Tiếp theo →</button>
+      <div id="result-d04"></div>
+    </div>
+
+    <!-- D0.5 -->
+    <div class="wiz-card" id="panel-d05" style="display:none">
+      <h2>Bước 5 — Xác nhận & Sinh hàng đợi D7</h2>
+      <div id="d05-summary" style="color:#475569;font-size:0.9rem;margin-bottom:1rem;"></div>
+      <button class="btn-primary" onclick="runStep('D0.5')">✅ Xác nhận & Hoàn tất thành lập công ty</button>
+      <div id="result-d05"></div>
+    </div>
+
+    <!-- Company ID input (top of form) -->
+    <div class="wiz-card" id="company-id-card" style="order:-1;margin-bottom:1.25rem;">
+      <div class="wiz-field" style="margin:0">
+        <label>Company ID</label>
+        <input type="text" id="company-id-input" placeholder="VD: my-startup" value="hermes-poclip-demo">
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-links">
+    <a href="/org-chart">→ Org Chart</a>
+    <a href="/onboarding-wizard">→ Onboarding Wizard (D7)</a>
+    <a href="/executive-dashboard">→ Executive Dashboard</a>
+  </div>
+</div>
+<script src="/static/js/genesis.js"></script>
+</body>
+</html>

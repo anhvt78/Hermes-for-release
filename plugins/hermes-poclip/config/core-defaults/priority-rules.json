@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "description": "[BỔ SUNG 31/08 — XT-09] Priority rules cho Conflict Escalation (G.3.4). Nội dung lấy từ phan-g-camnang.md G.3.4.4 (dòng 1517-1573). TC-03 đọc file này khi apply_priority_rules(); T0-03 tạo file này (phân bổ: T0-03 sở hữu config/core-defaults/).",
+  "rules": [
+    {
+      "id": "PR-001",
+      "name": "Compliance veto luôn thắng",
+      "when": "conflict_type == 'veto' AND respondent == 'compliance'",
+      "outcome": "respondent_wins",
+      "rationale": "Tuân thủ pháp luật ưu tiên tuyệt đối"
+    },
+    {
+      "id": "PR-002",
+      "name": "Audit veto luôn thắng",
+      "when": "conflict_type == 'veto' AND respondent == 'audit'",
+      "outcome": "respondent_wins",
+      "rationale": "Kiểm toán độc lập — không thể override"
+    },
+    {
+      "id": "PR-003",
+      "name": "Ưu tiên doanh thu khi xung đột tài nguyên",
+      "when": "conflict_type == 'resource' AND initiator IN ('sales','marketing')",
+      "outcome": "initiator_wins",
+      "condition": "potential_revenue > 50000000",
+      "rationale": "Tối đa hoá doanh thu trong giới hạn pháp lý"
+    },
+    {
+      "id": "PR-004",
+      "name": "Finance thắng khi xung đột ngân sách",
+      "when": "conflict_type == 'priority' AND topic STARTS_WITH 'budget'",
+      "outcome": "finance_cluster_wins",
+      "rationale": "Finance giữ tính toàn vẹn ngân sách"
+    },
+    {
+      "id": "PR-005",
+      "name": "Escalate Chủ tịch khi vượt ngưỡng tài chính",
+      "when": "involved_amount_vnd > 100000000",
+      "outcome": "escalate_chairman",
+      "rationale": "Giao dịch lớn cần phê duyệt con người"
+    },
+    {
+      "id": "PR-006",
+      "name": "CEO Agent không thể tự override Audit",
+      "when": "conflict_involves == 'audit_findings'",
+      "outcome": "escalate_chairman",
+      "rationale": "Tránh CEO che giấu kết quả kiểm toán"
+    }
+  ],
+  "default_when_no_rule_matches": "escalate_to_step2",
+  "last_updated": "2026-08-31",
+  "approved_by": "chairman"
+}

@@ -1,0 +1,108 @@
+{
+  "agent_id": "customer_success-agent-2",
+  "version": "1.0.0",
+  "role_type": "worker",
+  "reports_to": "customer_success-lead-agent",
+  "cluster": "customer_success",
+  "status": "sandbox",
+  "lifecycle_stage": "design",
+  "objective": {
+    "primary_goal": "Chuyên viên hỗ trợ kỹ thuật: tiếp nhận và xử lý yêu cầu kỹ thuật của khách hàng trong phạm vi phòng Chăm sóc khách hàng",
+    "primary_goal_en": "Technical Support Specialist: handle technical requests from customers within the Customer Success department",
+    "north_star_kpi_ref": "kpi_ticket_resolution"
+  },
+  "kpis": [
+    {
+      "id": "kpi_ticket_resolution",
+      "metric": "tickets_resolved_per_week",
+      "target_operator": ">=",
+      "target_value": 40,
+      "unit": "count",
+      "frequency": "weekly"
+    },
+    {
+      "id": "kpi_frt",
+      "metric": "first_response_time_minutes",
+      "target_operator": "<=",
+      "target_value": 30,
+      "unit": "minutes",
+      "frequency": "daily"
+    },
+    {
+      "id": "kpi_csat",
+      "metric": "customer_satisfaction_score",
+      "target_operator": ">=",
+      "target_value": 4.5,
+      "unit": "score",
+      "frequency": "weekly"
+    }
+  ],
+  "io_contract": {
+    "accepts_event_topics": [
+      "product.release_deployed",
+      "incident.system_bug",
+      "lead.nurture_needed"
+    ],
+    "emits_event_topics": [
+      "incident.system_bug",
+      "customer.tier_upgraded"
+    ]
+  },
+  "tools": [
+    {
+      "name": "read_file",
+      "scope": "read_only:cs_playbooks — thay cho công cụ chưa có thật «knowledge_base»",
+      "write_access": false
+    },
+    {
+      "name": "search_files",
+      "scope": "read_only:cs_playbooks — thay cho công cụ chưa có thật «knowledge_base»",
+      "write_access": false
+    },
+    {
+      "name": "terminal",
+      "scope": "read_only:customer_data — thay cho công cụ chưa có thật «database_query»",
+      "write_access": false
+    }
+  ],
+  "authority": {
+    "auto_approve_max_vnd": 500000,
+    "requires_human_approval_above_vnd": 5000000,
+    "forbidden_actions": [
+      "issue_refund_without_lead_approval",
+      "promise_delivery_date_or_sla_outside_approved_playbook"
+    ]
+  },
+  "escalation_rules": [
+    {
+      "condition": "ticket_requires_decision_beyond_own_authority",
+      "action": "assign_to_lead_with_full_context",
+      "target_agent_or_human": "customer_success-lead-agent",
+      "max_response_time_seconds": 1800
+    },
+    {
+      "condition": "vip_customer_churn_risk_detected",
+      "action": "notify_lead_and_prepare_save_plan",
+      "target_agent_or_human": "customer_success-lead-agent",
+      "max_response_time_seconds": 900
+    },
+    {
+      "condition": "suspected_data_privacy_breach_or_legal_complaint",
+      "action": "stop_and_escalate_immediately",
+      "target_agent_or_human": "chu_tich",
+      "max_response_time_seconds": 300
+    }
+  ],
+  "sandbox_mode": "non_main",
+  "risk_tier_default": "T1",
+  "reviewer_model_diversity_required": false,
+  "_note": "Bổ sung 15/09/2026: vị trí này do Genesis tạo ở bước D0.5 nhưng trước đây CHƯA có thẻ vai trò, nên màn Cơ chế vận hành để trống 4 cột (leo thang / hạn mức tự quyết / ngưỡng xin ý kiến / KPI). Thẻ này bổ sung cho đúng vị trí thật, KHÔNG thay đổi 11 thẻ cũ.",
+  "planned_integrations": [
+    {
+      "name": "helpdesk_api",
+      "scope": "write:tickets_and_responses",
+      "write_access": true,
+      "status": "chưa tích hợp"
+    }
+  ]
+}

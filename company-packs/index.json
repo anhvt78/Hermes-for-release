@@ -1,0 +1,17 @@
+{
+ "format": 1,
+ "packs": [
+  {
+   "id": "software",
+   "label": "Công ty phần mềm AI",
+   "description": "Công ty phần mềm nhân viên AI: 6 nhân viên khung và các nhân viên theo ngành, quy trình A–E, quy trình dự án, chính sách, lịch họp, kỹ năng và kiến thức. Không kèm khoá API.",
+   "file": "software-company.hpcompany",
+   "size": 614198,
+   "sha256": "c0073ec47120521bb3798770e9e282a8d8a4f221bc8142678f20ff4ace6d64cb",
+   "files": 486,
+   "staff": 39,
+   "company_name": "Công ty Phần mềm AI",
+   "source_release": null
+  }
+ ]
+}

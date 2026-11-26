@@ -1,0 +1,132 @@
+# Allowlist + mặc định cho tạo agent 3D (A3D-04). Đọc bởi hermes_poclip/agents/provisioning.py.
+# Danh sách mô hình CHỌN SẴN (cũng là danh sách giao diện hiển thị; mục đầu tiên là mặc định). Mỗi mục: provider + model, tuỳ chọn label/label_en (tên hiển thị),
+# note/note_en (ghi chú), key_hint/key_hint_en (nhắc loại khoá cần dán), auth (nhãn phân biệt cùng mô hình nhưng khác loại khoá, vd claude_code).
+# Mô hình KHÔNG có trong danh sách vẫn nhập tay được ở bước khởi tạo (nhà cung cấp phải là nhà cung cấp lõi Hermes dùng khoá API) — đặt allow_custom_models: false để chặn.
+allow_custom_models: true
+models:
+  - provider: deepseek
+    model: deepseek-v4-flash
+    label: "DeepSeek — v4 Flash (rẻ, mặc định)"
+    label_en: "DeepSeek — v4 Flash (cheap, default)"
+    key_hint: "Khóa DeepSeek (sk-…)"
+    key_hint_en: "DeepSeek key (sk-…)"
+  - provider: deepseek
+    model: deepseek-v4-pro
+    label: "DeepSeek — v4 Pro"
+    label_en: "DeepSeek — v4 Pro"
+    key_hint: "Khóa DeepSeek (sk-…)"
+    key_hint_en: "DeepSeek key (sk-…)"
+  - provider: gemini
+    model: gemini-3.5-flash-lite
+    label: "Google Gemini — 3.5 Flash Lite"
+    label_en: "Google Gemini — 3.5 Flash Lite"
+    key_hint: "Khóa Google AI Studio (AIza…)"
+    key_hint_en: "Google AI Studio key (AIza…)"
+  - provider: gemini
+    model: gemini-3.1-pro-preview
+    label: "Google Gemini — 3.1 Pro (bản xem trước)"
+    label_en: "Google Gemini — 3.1 Pro (preview)"
+    key_hint: "Khóa Google AI Studio (AIza…)"
+    key_hint_en: "Google AI Studio key (AIza…)"
+  - provider: openai
+    model: gpt-5.5
+    label: "OpenAI — GPT-5.5"
+    label_en: "OpenAI — GPT-5.5"
+    key_hint: "Khóa OpenAI (sk-…)"
+    key_hint_en: "OpenAI key (sk-…)"
+  - provider: openai
+    model: gpt-5.4-mini
+    label: "OpenAI — GPT-5.4 mini (rẻ)"
+    label_en: "OpenAI — GPT-5.4 mini (cheap)"
+    key_hint: "Khóa OpenAI (sk-…)"
+    key_hint_en: "OpenAI key (sk-…)"
+  - provider: anthropic
+    model: claude-sonnet-5
+    label: "Claude — Sonnet 5 (khóa API Anthropic)"
+    label_en: "Claude — Sonnet 5 (Anthropic API key)"
+    key_hint: "Khóa API Anthropic (sk-ant-api…)"
+    key_hint_en: "Anthropic API key (sk-ant-api…)"
+  - provider: anthropic
+    model: claude-opus-5-5
+    label: "Claude — Opus 5.5 (mạnh, đắt)"
+    label_en: "Claude — Opus 5.5 (strong, expensive)"
+    key_hint: "Khóa API Anthropic (sk-ant-api…)"
+    key_hint_en: "Anthropic API key (sk-ant-api…)"
+  - provider: anthropic
+    model: claude-haiku-4-5-20251001
+    label: "Claude — Haiku 4.5 (nhanh, rẻ)"
+    label_en: "Claude — Haiku 4.5 (fast, cheap)"
+    key_hint: "Khóa API Anthropic (sk-ant-api…)"
+    key_hint_en: "Anthropic API key (sk-ant-api…)"
+  - provider: anthropic
+    model: claude-sonnet-5
+    auth: claude_code
+    label: "Claude Code — Sonnet 5 (dùng gói đăng ký Claude Code)"
+    label_en: "Claude Code — Sonnet 5 (uses your Claude Code subscription)"
+    key_hint: "Dán token dạng sk-ant-oat… lấy bằng lệnh `claude setup-token` trên máy đã đăng nhập Claude Code (không phải khóa API)"
+    key_hint_en: "Paste the sk-ant-oat… token from `claude setup-token` on a machine signed in to Claude Code (not an API key)"
+  - provider: kimi-coding
+    model: kimi-k3
+    label: "Kimi — K3 (Moonshot)"
+    label_en: "Kimi — K3 (Moonshot)"
+    key_hint: "Khóa Kimi/Moonshot (sk-…) hoặc khóa Kimi Code (sk-kimi-…)"
+    key_hint_en: "Kimi/Moonshot key (sk-…) or Kimi Code key (sk-kimi-…)"
+  - provider: kimi-coding
+    model: kimi-k2.6
+    label: "Kimi — K2.6"
+    label_en: "Kimi — K2.6"
+    key_hint: "Khóa Kimi/Moonshot (sk-…) hoặc khóa Kimi Code (sk-kimi-…)"
+    key_hint_en: "Kimi/Moonshot key (sk-…) or Kimi Code key (sk-kimi-…)"
+  - provider: xai
+    model: grok-4.5
+    label: "xAI — Grok 4.5"
+    label_en: "xAI — Grok 4.5"
+    key_hint: "Khóa xAI (xai-…)"
+    key_hint_en: "xAI key (xai-…)"
+  - provider: zai
+    model: glm-5.3
+    label: "GLM — 5.3 (Z.AI)"
+    label_en: "GLM — 5.3 (Z.AI)"
+    key_hint: "Khóa Z.AI / GLM"
+    key_hint_en: "Z.AI / GLM key"
+  - provider: alibaba
+    model: qwen3.8-max
+    label: "Qwen — 3.8 Max (Alibaba Cloud)"
+    label_en: "Qwen — 3.8 Max (Alibaba Cloud)"
+    key_hint: "Khóa DashScope (Alibaba Cloud)"
+    key_hint_en: "DashScope key (Alibaba Cloud)"
+  - provider: minimax
+    model: MiniMax-M3
+    label: "MiniMax — M3"
+    label_en: "MiniMax — M3"
+    key_hint: "Khóa MiniMax"
+    key_hint_en: "MiniMax key"
+  - provider: openrouter
+    model: openrouter/pareto-code
+    label: "OpenRouter — Pareto Code (nhiều mô hình qua một khóa)"
+    label_en: "OpenRouter — Pareto Code (many models, one key)"
+    key_hint: "Khóa OpenRouter (sk-or-…)"
+    key_hint_en: "OpenRouter key (sk-or-…)"
+# Chuỗi dự phòng model cho MỌI nhân sự AI tạo mới (nguồn DUY NHẤT — mã KHÔNG hardcode).
+# Chỉ khai (provider, model) — khoá API lấy từ môi trường/.env như lõi Hermes vẫn làm.
+# Thứ tự = thứ tự thử. Bỏ trống/mất khoá này => hệ thống suy mặc định từ allowlist models: bên trên.
+fallback_models:
+  - provider: gemini
+    model: gemini-3.5-flash-lite
+  - provider: openai
+    model: gpt-5.5
+clone_from:
+  - pt-nv-nguoi-dung
+kanban_board: default
+reserved_names:
+  - chu_tich
+  - admin
+  - default
+  - ceo_agent
+  - hermes
+  - hermes_agents
+skill_install_policy: copy
+# Danh sách skill MẶC ĐỊNH bắt buộc cài cho MỌI agent mới (Chủ tịch duyệt 08/09/2026).
+# Không thể gỡ qua payload (luôn được merge trước khi validate catalog).
+default_skills:
+  - claude-code

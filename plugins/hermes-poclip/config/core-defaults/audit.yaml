@@ -1,0 +1,39 @@
+# ============================================================
+# THAM SỐ MẶC ĐỊNH — AUDIT (có thể ghi đè theo công ty)
+# [BỔ SUNG] Nguyên tắc: mọi công ty dùng Hermes+ chạy được ngay với
+# giá trị default bên dưới, không cấu hình gì cũng ổn cho đa số
+# trường hợp. Muốn khác thì tạo file override cùng tên trong
+# company-config/ (không sửa trực tiếp file default này).
+# ============================================================
+component: "audit-agent"
+version: "1.0.0"
+
+parameters:
+  monthly_reconciliation_coverage_pct:
+    default: 10
+    min_allowed: 5
+    max_allowed: 100
+    description: "% giao dịch đối soát ngẫu nhiên mỗi tháng (monthly-close-pipeline, constitution.yaml financial_honesty)"
+    override_requires_approval_risk_tier: "T1"
+
+  weekly_spotcheck_kpi_count:
+    default: 2
+    min_allowed: 1
+    max_allowed: null
+    description: "Số chỉ số KPI đối chiếu ngẫu nhiên mỗi tuần (G.4.3.3 spot-check nhẹ) — không chặn SLA gửi báo cáo"
+    override_requires_approval_risk_tier: "T0"
+
+  critical_finding_alert_minutes:
+    default: 60
+    min_allowed: 5
+    max_allowed: null
+    description: "Thời gian tối đa từ lúc phát hiện bất thường nghiêm trọng tới khi báo Chủ tịch"
+    override_requires_approval_risk_tier: "T1"
+
+  financial_discrepancy_alert_threshold_pct:
+    default: 5
+    min_allowed: 1
+    max_allowed: null
+    description: "Ngưỡng % lệch số liệu tài chính để coi là bất thường cần báo ngay (không chờ chu kỳ đối soát định kỳ)"
+    override_requires_approval_risk_tier: "T2"
+    note: "Ngưỡng càng thấp càng nhạy — công ty tài chính/fintech nên đặt thấp hơn default"

@@ -1,0 +1,17 @@
+{
+  "release_id": "2026.11.26-5",
+  "version": "0.21.7",
+  "source_commit": "a3c3a0fa542cb654770eeea8b7b7fcf9ef936f8f",
+  "source_branch": "HEAD",
+  "created_at": "2026-11-26T08:09:09.139429+00:00",
+  "notes": "Cài kèm gói công ty phần mềm AI (cờ --company none|software, không kèm khoá API); hướng dẫn cài nêu rõ cờ --company; giao diện cho Chủ tịch; sửa quy trình dự án trên giao diện; báo cáo ngày/tháng; nhiều sửa lỗi.",
+  "build": {
+    "kind": "compiled",
+    "python": "cp311",
+    "platform": "linux-x86_64",
+    "cython": "3.1.4",
+    "source_release": "2026.11.26-5",
+    "default_trial_days": 180,
+    "built_at": "2026-11-26T09:12:37.459561+00:00"
+  }
+}

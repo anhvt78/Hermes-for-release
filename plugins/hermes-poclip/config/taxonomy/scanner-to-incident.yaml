@@ -1,0 +1,53 @@
+version: "1.0.0"
+description: "Ánh xạ mã máy quét (scan_findings.py) → mã danh mục incident_class"
+
+mappings:
+  # kanban_blocked → 2 lớp tuỳ recurrence_count
+  - scanner_code: "kanban_blocked"
+    condition: "recurrence_count == 0"
+    incident_class: "task_blocked_lan_dau"
+
+  - scanner_code: "kanban_blocked"
+    condition: "recurrence_count >= 1"
+    incident_class: "task_blocked_loop"
+
+  # Ánh xạ trực tiếp (không điều kiện)
+  - scanner_code: "kanban_heartbeat_lost"
+    incident_class: "task_ket_heartbeat"
+
+  - scanner_code: "task_ready_ket"
+    incident_class: "task_ready_ket"
+
+  - scanner_code: "dispatcher_chet"
+    incident_class: "dispatcher_chet"
+
+  - scanner_code: "action_item_overdue"
+    incident_class: "ton_dong_task"
+
+  - scanner_code: "escalation_overdue"
+    incident_class: "waiting_review_sla"
+
+  - scanner_code: "stuck_meeting_session"
+    incident_class: "phien_hop_ket"
+
+  - scanner_code: "stuck_provisioning_job"
+    incident_class: "cap_phat_ket"
+
+  # Máy quét nghiệp vụ mới (B3)
+  - scanner_code: "approval_waiting_overdue"
+    incident_class: "waiting_review_sla"
+
+  - scanner_code: "raci_task_overdue"
+    incident_class: "ton_dong_task"
+
+  - scanner_code: "budget_threshold_exceeded"
+    incident_class: "chi_phi_ha_tang"
+
+  - scanner_code: "su_co_milestone"
+    incident_class: "su_co_milestone"
+
+  - scanner_code: "vi_pham_quy_trinh"
+    incident_class: "vi_pham_quy_trinh"
+
+  - scanner_code: "trat_tu_task"
+    incident_class: "trat_tu_task"

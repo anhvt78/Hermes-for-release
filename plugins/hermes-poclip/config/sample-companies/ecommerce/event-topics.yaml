@@ -1,0 +1,37 @@
+# CHỦ ĐỀ SỰ KIỆN RIÊNG CỦA MẪU CÔNG TY THƯƠNG MẠI ĐIỆN TỬ (tách khỏi nền tảng ngày 10/11/2026).
+# Dùng làm dữ liệu mẫu/thử: đặt biến môi trường HERMES_POCLIP_SAMPLE_COMPANY=ecommerce trước khi tạo cơ sở dữ liệu mới
+# thì các chủ đề này được nạp thêm cùng bộ chung. Công ty thật khai chủ đề của mình ở trang «Quy tắc luồng giữa các phòng»
+# hoặc trong bản phác thảo ngành. Bên gửi/nhận dưới đây là phòng của mẫu này (sales, marketing, customer_success, tech_product, finance).
+version: "1.0.0"
+
+topics:
+  - name: "lead.qualified"
+    producer_clusters: ["marketing"]
+    consumer_clusters: ["sales"]
+    default_risk_tier: "T1"
+    sla_seconds: 5
+  - name: "lead.nurture_needed"
+    producer_clusters: ["marketing"]
+    consumer_clusters: ["customer_success"]
+    default_risk_tier: "T0"
+    sla_seconds: 30
+  - name: "customer.tier_upgraded"
+    producer_clusters: ["sales", "customer_success"]
+    consumer_clusters: ["marketing"]
+    default_risk_tier: "T0"
+    sla_seconds: 30
+  - name: "order.completed"
+    producer_clusters: ["sales"]
+    consumer_clusters: ["tech_product", "finance"]
+    default_risk_tier: "T1"
+    sla_seconds: 120
+  - name: "product.release_deployed"
+    producer_clusters: ["tech_product"]
+    consumer_clusters: ["customer_success", "sales"]
+    default_risk_tier: "T0"
+    sla_seconds: 300
+  - name: "incident.system_bug"
+    producer_clusters: ["customer_success", "sales"]
+    consumer_clusters: ["tech_product"]
+    default_risk_tier: "T2"
+    sla_seconds: 1

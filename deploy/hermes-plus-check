@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# hermes-plus-check — lệnh tự kiểm hệ thống Hermes+
+#
+# Cách dùng (trên bản cài):
+#   /opt/hermes-plus/deploy/hermes-plus-check quota  --once --force --json --db /tmp/check/company.db
+#   /opt/hermes-plus/deploy/hermes-plus-check backup --once --force --db /tmp/check/company.db --backup-dir /tmp/check/backups
+#   /opt/hermes-plus/deploy/hermes-plus-check ops    --once --json --db /tmp/check/company.db
+#   /opt/hermes-plus/deploy/hermes-plus-check --help
+#
+# Cách dùng (trên máy dev, từ thư mục hermes+):
+#   ./deploy/hermes-plus-check quota --once --force --json --db /tmp/check/company.db
+#
+# Luôn dùng bản sao DB khi tự kiểm:
+#   sqlite3 /var/lib/hermes-plus/poclip.db ".backup /tmp/check/company.db"
+#
+# Xem thêm: hermes-agent-main/plugins/hermes-poclip/docs/giam-sat-hoat-dong-lien-tuc.md
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LAUNCHER="$ROOT/hermes-agent-main/plugins/hermes-poclip/selfcheck.py"
+
+if [ ! -f "$LAUNCHER" ]; then
+    echo "Lỗi: không tìm thấy launcher tại: $LAUNCHER" >&2
+    echo "Kiểm tra lại cấu trúc thư mục: ROOT=$ROOT phải chứa hermes-agent-main/plugins/hermes-poclip/selfcheck.py" >&2
+    exit 1
+fi
+
+PY="$ROOT/hermes-agent-main/venv/bin/python"
+if [ ! -x "$PY" ]; then
+    PY="$(command -v python3 || true)"
+    if [ -z "$PY" ]; then
+        echo "Lỗi: không tìm thấy python3 trong PATH và không có venv tại $ROOT/hermes-agent-main/venv" >&2
+        exit 1
+    fi
+fi
+
+exec "$PY" "$LAUNCHER" "$@"

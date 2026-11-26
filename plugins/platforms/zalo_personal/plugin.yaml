@@ -1,0 +1,7 @@
+name: zalo-personal
+label: Zalo Personal
+kind: platform
+version: 1.0.0
+description: Hermes platform for one QR-authenticated Zalo personal account.
+author: Cong Thuan MMM
+license: MIT
